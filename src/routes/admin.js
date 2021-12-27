@@ -1,5 +1,7 @@
 import express from 'express';
 import validate from 'express-validation';
+import * as companyController from '../controllers/admin/company/company.controller';
+import * as companyValidator from '../controllers/admin/company/company.validator';
 import * as deviceController from '../controllers/admin/device/device.controller';
 import * as deviceValidator from '../controllers/admin/device/device.validator';
 import * as userController from '../controllers/admin/user/user.controller';
@@ -28,5 +30,12 @@ router.post('/device', validate(deviceValidator.createDevice), deviceController.
 router.put('/device/:id', validate(deviceValidator.updateDevice), deviceController.update);
 router.put('/device/:id/status', deviceController.statusUpdate);
 router.post('/device/map', validate(deviceValidator.tagDevice), deviceController.deviceTagToCompanyDoctor);
+
+
+//Company
+router.get('/companies', companyController.all);
+router.get('/company/:id', companyController.findById);
+router.post('/company', validate(companyValidator.createCompany), companyController.create);
+router.put('/company/:id', validate(companyValidator.updateCompany), companyController.update);
 
 module.exports = router;
