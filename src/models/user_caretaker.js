@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const UserCareTaker = sequelize.define('UserCareTaker', {
+  const UserCareTakerMappings = sequelize.define('UserCareTakerMappings', {
     patient_id: {
       type: DataTypes.INTEGER,
       references: {
@@ -22,8 +22,8 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE'
     }
   }, {});
-  UserCareTaker.associate = function (models) {
+  UserCareTakerMappings.associate = function (models) {
     // associations can be defined here
   };
-  return UserCareTaker;
+  return UserCareTakerMappings;
 };

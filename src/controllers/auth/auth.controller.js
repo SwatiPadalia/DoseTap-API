@@ -2,11 +2,12 @@ import axios from 'axios';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { errorResponse, successResponse, uniqueCode, uniqueId } from '../../helpers';
-import { User } from '../../models';
+import { User, UserCareTakerMappings } from '../../models';
 const { Op } = require('sequelize')
 
 export const register = async (req, res) => {
     try {
+        let patient;
         const {
             firstName, lastName, age, gender, email, password, phone, city, role, caretaker_code
         } = req.body;
@@ -48,6 +49,7 @@ export const register = async (req, res) => {
             });
             if (!userWithActivationCode)
                 throw new Error('Activation Code do not exist');
+            patient = userWithActivationCode;
         }
 
         const reqPass = crypto
@@ -70,6 +72,14 @@ export const register = async (req, res) => {
         };
 
         const newUser = await User.create(payload);
+        if (role == "caretaker") {
+            const mappingPayload = {
+                patient_id: patient.id,
+                caretaker_id: newUser.id
+            }
+            console.log("mappingPayload", mappingPayload)
+            const newUserCaretakerMapping = await UserCareTakerMappings.create(mappingPayload);
+        }
         return successResponse(req, res, { newUser });
     } catch (error) {
         console.log(error)

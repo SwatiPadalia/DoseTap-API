@@ -1,10 +1,11 @@
 import crypto from 'crypto';
 import { errorResponse, successResponse, uniqueCode, uniqueId } from '../../../helpers';
-import { User } from '../../../models';
+import { User, UserCareTakerMappings } from '../../../models';
 const { Op } = require('sequelize')
 
 export const create = async (req, res) => {
     try {
+        let patient;
         const {
             firstName, lastName, age, gender, email, password, phone, city, role = "patient", caretaker_code
         } = req.body;
@@ -26,6 +27,7 @@ export const create = async (req, res) => {
             });
             if (!userWithActivationCode)
                 throw new Error('Activation Code do not exist');
+            patient = userWithActivationCode;
         }
         const reqPass = crypto
             .createHash('md5')
@@ -51,6 +53,15 @@ export const create = async (req, res) => {
             payload.uniqueCode = uniqueCode('lowercase', 3, 3, firstName);
         }
         const newUser = await User.create(payload);
+
+        console.log("role", role);
+        if (role == "caretaker") {
+            const mappingPayload = {
+                patient_id: patient.id,
+                caretaker_id: newUser.id
+            }
+            const newUserCaretakerMapping = await UserCareTakerMappings.create(mappingPayload);
+        }
         return successResponse(req, res, { newUser });
     } catch (error) {
         return errorResponse(req, res, error.message);
