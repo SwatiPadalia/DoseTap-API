@@ -1,8 +1,8 @@
 import express from 'express';
 import validate from 'express-validation';
-
 import * as userController from '../controllers/user/user.controller';
 import * as userValidator from '../controllers/user/user.validator';
+
 
 const router = express.Router();
 
@@ -10,6 +10,7 @@ const router = express.Router();
 // API routes
 //= ===============================
 router.get('/me', userController.profile);
+router.post('/me', validate(userValidator.update), userController.update);
 router.post(
   '/changePassword',
   validate(userValidator.changePassword),

@@ -40,3 +40,36 @@ export const changePassword = async (req, res) => {
     return errorResponse(req, res, error.message);
   }
 };
+
+export const update = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const {
+      firstName,
+      lastName,
+      gender,
+      age,
+      phone,
+      city
+    } = req.body;
+
+    const user = await User.findOne({ where: { id: userId } });
+    if (!user)
+      throw new Error('User do not exist');
+
+    const payload = {
+      firstName,
+      lastName,
+      gender,
+      age,
+      phone,
+      city
+    }
+    const updatedUser = await User.update(payload, { where: { id: userId } });
+    return successResponse(req, res, { user });
+
+  } catch (error) {
+    const err = error.errors[0];
+    return errorResponse(req, res, err.message);
+  }
+};
