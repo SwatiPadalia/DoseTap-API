@@ -6,6 +6,8 @@ import * as deviceController from '../controllers/admin/device/device.controller
 import * as deviceValidator from '../controllers/admin/device/device.validator';
 import * as medicineController from '../controllers/admin/medicine/medicine.controller';
 import * as medicineValidator from '../controllers/admin/medicine/medicine.validator';
+import * as slotController from '../controllers/admin/slot/slot.controller';
+import * as slotValidator from '../controllers/admin/slot/slot.validator';
 import * as userController from '../controllers/admin/user/user.controller';
 import * as userValidator from '../controllers/admin/user/user.validator';
 
@@ -48,4 +50,12 @@ router.get('/medicine/:id', medicineController.findById);
 router.post('/medicine', validate(medicineValidator.create), medicineController.create);
 router.put('/medicine/:id', validate(medicineValidator.update), medicineController.update);
 router.put('/medicine/:id/status', medicineController.statusUpdate);
+
+
+//Slot
+router.get('/slots', slotController.all);
+router.get('/slot/:id', slotController.findById);
+router.post('/slot', validate(slotValidator.create), slotController.create);
+router.put('/slot/:id', validate(slotValidator.update), slotController.update);
+
 module.exports = router;
