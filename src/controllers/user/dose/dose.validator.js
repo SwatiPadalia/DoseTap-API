@@ -13,4 +13,14 @@ export const scheduleDoses = {
   }
 };
 
+export const updateDoses = {
+  body: {
+    medicine_id: Joi.number().required(),
+    slot_id: Joi.number().required(),
+    time: Joi.string().required(),
+    days: Joi.array().required(),
+    count: Joi.number().required()
+  }
+};
+
 

@@ -20,5 +20,7 @@ router.post(
 );
 
 router.post('/schedule', validate(doseValidator.scheduleDoses), doseController.scheduleDose);
+router.put('/schedule/:id', validate(doseValidator.updateDoses), doseController.updateScheduledDose);
+router.delete('/schedule/:id', doseController.deleteScheduledDose);
 
 module.exports = router;
