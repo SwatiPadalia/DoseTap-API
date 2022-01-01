@@ -1,5 +1,7 @@
 import express from 'express';
 import validate from 'express-validation';
+import * as doseController from '../controllers/user/dose/dose.controller';
+import * as doseValidator from '../controllers/user/dose/dose.validator';
 import * as userController from '../controllers/user/user.controller';
 import * as userValidator from '../controllers/user/user.validator';
 
@@ -16,5 +18,7 @@ router.post(
   validate(userValidator.changePassword),
   userController.changePassword,
 );
+
+router.post('/schedule', validate(doseValidator.scheduleDoses), doseController.scheduleDose);
 
 module.exports = router;

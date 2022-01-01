@@ -4,6 +4,8 @@ import * as companyController from '../controllers/admin/company/company.control
 import * as companyValidator from '../controllers/admin/company/company.validator';
 import * as deviceController from '../controllers/admin/device/device.controller';
 import * as deviceValidator from '../controllers/admin/device/device.validator';
+import * as medicineController from '../controllers/admin/medicine/medicine.controller';
+import * as medicineValidator from '../controllers/admin/medicine/medicine.validator';
 import * as userController from '../controllers/admin/user/user.controller';
 import * as userValidator from '../controllers/admin/user/user.validator';
 
@@ -38,4 +40,12 @@ router.get('/company/:id', companyController.findById);
 router.post('/company', validate(companyValidator.createCompany), companyController.create);
 router.put('/company/:id', validate(companyValidator.updateCompany), companyController.update);
 
+
+// Medicine
+
+router.get('/medicines', medicineController.all);
+router.get('/medicine/:id', medicineController.findById);
+router.post('/medicine', validate(medicineValidator.create), medicineController.create);
+router.put('/medicine/:id', validate(medicineValidator.update), medicineController.update);
+router.put('/medicine/:id/status', medicineController.statusUpdate);
 module.exports = router;
