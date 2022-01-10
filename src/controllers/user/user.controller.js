@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import { errorResponse, successResponse } from '../../helpers';
 import { User } from '../../models';
 const { Op } = require('sequelize')
@@ -7,7 +8,19 @@ export const profile = async (req, res) => {
   try {
     const { userId } = req.user;
     const user = await User.findOne({ where: { id: userId } });
-    return successResponse(req, res, { user });
+    const token = jwt.sign(
+      {
+        user: {
+          userId: user.id,
+          email: user.email,
+          role: user.role,
+          phone: user.phone,
+          createdAt: new Date(),
+        },
+      },
+      process.env.SECRET,
+    );
+    return successResponse(req, res, { user, token });
   } catch (error) {
     return errorResponse(req, res, error.message);
   }
