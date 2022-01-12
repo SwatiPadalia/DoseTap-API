@@ -180,7 +180,11 @@ export const all = async (req, res) => {
             offset: (page - 1) * limit,
             limit,
         });
-        return successResponse(req, res, { users });
+        return successResponse(req, res, { users: {
+            ...users,
+            currentPage: parseInt(page),
+            totalPage: Math.ceil(users.count/limit)
+        } });
     } catch (error) {
         return errorResponse(req, res, error.message);
     }
