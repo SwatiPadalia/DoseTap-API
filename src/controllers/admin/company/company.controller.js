@@ -79,7 +79,11 @@ export const all = async (req, res) => {
             offset: (page - 1) * limit,
             limit,
         });
-        return successResponse(req, res, { companies });
+        return successResponse(req, res, { companies: {
+            ...companies,
+            currentPage: parseInt(page),
+            totalPage: Math.ceil(companies.count/limit)
+        } });
     } catch (error) {
         return errorResponse(req, res, error.message);
     }

@@ -108,7 +108,12 @@ export const all = async (req, res) => {
             offset: (page - 1) * limit,
             limit,
         });
-        return successResponse(req, res, { devices });
+        return successResponse(req, res, { devices: {
+            ...devices,
+            currentPage: parseInt(page),
+            totalPage: Math.ceil(devices.count/limit)
+        } });
+
     } catch (error) {
         return errorResponse(req, res, error.message);
     }
