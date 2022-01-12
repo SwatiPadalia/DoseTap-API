@@ -1,7 +1,8 @@
 import crypto from 'crypto';
 import { errorResponse, successResponse, uniqueCode, uniqueId } from '../../../helpers';
 import { User, UserCareTakerMappings } from '../../../models';
-const { Op } = require('sequelize')
+const { Op } = require('sequelize');
+const sequelize = require('sequelize');
 
 export const create = async (req, res) => {
     try {
@@ -168,24 +169,64 @@ export const findById = async (req, res) => {
 
 export const all = async (req, res) => {
 
-    const filerByRole = {
-        role: req.query.role
-    }
     try {
+        let searchFilter = null, statusFilter = null;
+
+        const role = req.query.role;
+
+        if (role === undefined) {
+            throw new Error('Role is required in query parameter');
+        }
+
+        const sort = req.query.sort || -1;
+
+        if (req.query.search) {
+            const search = req.query.search;
+
+            searchFilter = {
+                [Op.or]: [
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('firstName')), { [Op.like]: `%${search}%` }
+                    ),
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('email')), { [Op.like]: `%${search}%` }
+                    ),
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('phone')), { [Op.like]: `%${search}%` }
+                    )
+                ]
+            }
+        }
+
+        if (req.query.status) {
+            const status = req.query.status;
+            if (status == 1) {
+                statusFilter = true
+            } else {
+                statusFilter = false
+            }
+        }
+
         const page = req.query.page || 1;
         const limit = 10;
+        const sortOrder = sort == -1 ? 'ASC' : 'DESC';
         const users = await User.findAndCountAll({
-            where: filerByRole,
-            order: [['createdAt', 'DESC'], ['id', 'ASC']],
+            where: {
+                [Op.and]: [{ role }, statusFilter === null ? undefined : { status: statusFilter }, searchFilter === null ? undefined : { searchFilter }]
+            },
+            order: [['id', sortOrder]],
             offset: (page - 1) * limit,
             limit,
         });
-        return successResponse(req, res, { users: {
-            ...users,
-            currentPage: parseInt(page),
-            totalPage: Math.ceil(users.count/limit)
-        } });
+        return successResponse(req, res, {
+            users: {
+                ...users,
+                currentPage: parseInt(page),
+                totalPage: Math.ceil(users.count / limit)
+            }
+        });
     } catch (error) {
+        console.log("🚀 ~ file: user.controller.js ~ line 221 ~ all ~ error", error)
         return errorResponse(req, res, error.message);
     }
 };
