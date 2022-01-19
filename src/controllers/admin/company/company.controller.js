@@ -46,7 +46,7 @@ export const update = async (req, res) => {
             name
         };
 
-        const updatedCompany = await Device.update(payload, { where: { id } });
+        const updatedCompany = await Company.update(payload, { where: { id } });
         return successResponse(req, res, {});
     } catch (error) {
         console.log(error)
