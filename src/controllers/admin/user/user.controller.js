@@ -143,7 +143,9 @@ export const statusUpdate = async (req, res) => {
         };
 
         const updatedUser = await User.update(payload, { where: { id } });
-        return successResponse(req, res, {});
+
+        user.status = !user.status
+        return successResponse(req, res, { user });
     } catch (error) {
         console.log(error)
         return errorResponse(req, res, error.message);

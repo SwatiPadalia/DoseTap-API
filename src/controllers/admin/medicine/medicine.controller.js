@@ -106,7 +106,8 @@ export const statusUpdate = async (req, res) => {
         };
 
         const updatedMedicine = await Medicine.update(payload, { where: { id } });
-        return successResponse(req, res, {});
+        medicine.status = !medicine.status
+        return successResponse(req, res, { medicine });
     } catch (error) {
         console.log(error)
         return errorResponse(req, res, error.message);

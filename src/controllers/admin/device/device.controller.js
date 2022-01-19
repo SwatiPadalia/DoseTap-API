@@ -75,7 +75,8 @@ export const statusUpdate = async (req, res) => {
         };
 
         const updatedDevice = await Device.update(payload, { where: { id } });
-        return successResponse(req, res, {});
+        device.status = !device.status
+        return successResponse(req, res, { device });
     } catch (error) {
         console.log(error)
         return errorResponse(req, res, error.message);
@@ -108,11 +109,13 @@ export const all = async (req, res) => {
             offset: (page - 1) * limit,
             limit,
         });
-        return successResponse(req, res, { devices: {
-            ...devices,
-            currentPage: parseInt(page),
-            totalPage: Math.ceil(devices.count/limit)
-        } });
+        return successResponse(req, res, {
+            devices: {
+                ...devices,
+                currentPage: parseInt(page),
+                totalPage: Math.ceil(devices.count / limit)
+            }
+        });
 
     } catch (error) {
         return errorResponse(req, res, error.message);
