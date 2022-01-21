@@ -9,6 +9,7 @@ export const register = {
         age: Joi.number().required(),
         gender: Joi.string().required(),
         city: Joi.string().required(),
+        state: Joi.string().required(),
         role: Joi.string().required().valid('user', 'admin', 'caretaker', 'doctor'),
         caretaker_code: Joi.string().when("role", {
             is: "caretaker",
