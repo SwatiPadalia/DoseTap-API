@@ -89,7 +89,7 @@ export const all = async (req, res) => {
             }
         }
 
-        const limit = 10;
+        const limit = 1000;
         const medicines = await Medicine.findAndCountAll({
             where: searchFilter === null ? undefined : { searchFilter },
             order: [['createdAt', 'DESC'], ['id', 'ASC']],
