@@ -63,7 +63,8 @@ export const update = async (req, res) => {
       gender,
       age,
       phone,
-      city
+      city,
+      state
     } = req.body;
 
     const user = await User.findOne({ where: { id: userId } });
@@ -76,7 +77,8 @@ export const update = async (req, res) => {
       gender,
       age,
       phone,
-      city
+      city,
+      state
     }
     const updatedUser = await User.update(payload, { where: { id: userId } });
     return successResponse(req, res, { user });
