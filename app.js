@@ -24,7 +24,7 @@ app.use(
 app.use(cors());
 app.use(bodyParser.json());
 app.use('/api', publicRoutes);
-app.use('/api', userMiddleware, userRoutes);
+app.use('/api/user', userMiddleware, userRoutes);
 app.use('/api/admin', userMiddleware, adminMiddleware, adminRoutes);
 app.use(errorHandler);
 

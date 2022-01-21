@@ -38,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         defaultValue: null
       },
+      state: {
+        type: DataTypes.STRING,
+        defaultValue: null
+      },
       role: {
         type: DataTypes.ENUM,
         allowNull: false,

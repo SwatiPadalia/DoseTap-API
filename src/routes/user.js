@@ -2,9 +2,10 @@ import express from 'express';
 import validate from 'express-validation';
 import * as doseController from '../controllers/user/dose/dose.controller';
 import * as doseValidator from '../controllers/user/dose/dose.validator';
+import * as medicineController from '../controllers/user/medicine/medicine.controller';
+import * as medicineValidator from '../controllers/user/medicine/medicine.validator';
 import * as userController from '../controllers/user/user.controller';
 import * as userValidator from '../controllers/user/user.validator';
-
 
 const router = express.Router();
 
@@ -18,6 +19,12 @@ router.post(
   validate(userValidator.changePassword),
   userController.changePassword,
 );
+
+router.get('/medicines', medicineController.all);
+router.get('/medicine/:id', medicineController.findById);
+router.post('/medicine', validate(medicineValidator.create), medicineController.create);
+router.put('/medicine/:id', validate(medicineValidator.update), medicineController.update);
+router.put('/medicine/:id/status', medicineController.statusUpdate);
 
 router.post('/schedule', validate(doseValidator.scheduleDoses), doseController.scheduleDose);
 router.put('/schedule/:id', validate(doseValidator.updateDoses), doseController.updateScheduledDose);
