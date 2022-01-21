@@ -73,7 +73,7 @@ export const update = async (req, res) => {
     try {
         const id = req.params.id;
         const {
-            firstName, lastName, age, gender, email, password, phone, city, role
+            firstName, lastName, age, gender, email, password, phone, city, role, state
         } = req.body;
 
         const user = await User.scope('withSecretColumns').findOne({
@@ -101,7 +101,8 @@ export const update = async (req, res) => {
                 gender,
                 age,
                 phone,
-                city
+                city,
+                state
             };
         } else {
             payload = {
@@ -112,7 +113,8 @@ export const update = async (req, res) => {
                 gender,
                 age,
                 phone,
-                city
+                city,
+                state
             };
         }
 
