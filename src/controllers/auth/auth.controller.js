@@ -9,7 +9,7 @@ export const register = async (req, res) => {
     try {
         let patient;
         const {
-            firstName, lastName, age, gender, email, password, phone, city, role, caretaker_code
+            firstName, lastName, age, gender, email, password, phone, city, role, caretaker_code, state
         } = req.body;
         if (process.env.IS_GOOGLE_AUTH_ENABLE === 'true') {
             if (!req.body.code) {
@@ -68,7 +68,8 @@ export const register = async (req, res) => {
             gender,
             caretaker_code: role == "user" ? uniqueCode('lowercase', 4, 3, firstName) : null,
             phone,
-            city
+            city,
+            state
         };
 
         const newUser = await User.create(payload);

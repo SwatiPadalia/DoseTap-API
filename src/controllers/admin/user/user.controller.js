@@ -8,7 +8,7 @@ export const create = async (req, res) => {
     try {
         let patient;
         const {
-            firstName, lastName, age, gender, email, password, phone, city, role = "patient", caretaker_code
+            firstName, lastName, age, gender, email, password, phone, city, role = "patient", caretaker_code, state
         } = req.body;
 
         const user = await User.scope('withSecretColumns').findOne({
@@ -48,7 +48,8 @@ export const create = async (req, res) => {
             gender,
             age,
             phone,
-            city
+            city,
+            state
         };
         if (role == "patient") {
             payload.uniqueCode = uniqueCode('lowercase', 3, 3, firstName);
