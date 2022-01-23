@@ -13,6 +13,7 @@ module.exports = {
         city: "Delhi",
         gender: "male",
         age: 23,
+        state: "West Bengal",
         phone: '8722682249',
         createdAt: new Date(),
         updatedAt: new Date(),
