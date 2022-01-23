@@ -80,8 +80,10 @@ export const update = async (req, res) => {
       city,
       state
     }
-    const updatedUser = await User.update(payload, { where: { id: userId } });
-    return successResponse(req, res, { user });
+    console.log("🚀 ~ file: user.controller.js ~ line 83 ~ update ~ payload", payload)
+    const updated = await User.update(payload, { where: { id: userId } });
+    const updatedUser = await User.findOne({ where: { id: userId } });
+    return successResponse(req, res, { user: updatedUser });
 
   } catch (error) {
     const err = error.errors[0];
