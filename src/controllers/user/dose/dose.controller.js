@@ -1,31 +1,28 @@
 import { errorResponse, successResponse } from '../../../helpers';
 const { Op } = require('sequelize');
-const { ScheduleDose } = require('../../../models');
+const { ScheduleDose, Medicine, User } = require('../../../models');
 
 
 export const scheduleDose = async (req, res) => {
   try {
     const { userId: patient_id } = req.user;
-    const scheduleArray = req.body.data;
-    scheduleArray.map(async data => {
-      const {
-        medicine_id,
-        slot_id,
-        time,
-        days,
-        count } = data;
+    console.log("🚀 ~ file: dose.controller.js ~ line 9 ~ scheduleDose ~ patient_id", patient_id)
+    const {
+      medicine_id,
+      slot_ids,
+      days,
+      count_morning, count_afternoon, count_evening, count_night } = req.body.data;
 
-      const payload = {
-        patient_id,
-        medicine_id,
-        slot_id,
-        time,
-        days,
-        count
-      }
+    const payload = {
+      patient_id,
+      medicine_id,
+      slot_ids,
+      days,
+      count_morning, count_afternoon, count_evening, count_night
+    }
 
-      const doseDeleted = await ScheduleDose.create(payload);
-    });
+    const doseCreated = await ScheduleDose.create(payload);
+
 
     return successResponse(req, res, {});
   } catch (error) {
@@ -40,27 +37,21 @@ export const updateScheduledDose = async (req, res) => {
     const { userId: patient_id } = req.user;
     const id = req.params.id;
     const {
-      medicine_id,
-      slot_id,
-      time,
+      slot_ids,
       days,
-      count } = req.body;
+      count_morning, count_afternoon, count_evening, count_night } = req.body;
 
     const dose = await ScheduleDose.findOne({ where: { [Op.and]: [{ patient_id }, { id }] } });
     if (!dose)
       throw new Error('Dose do not exist');
 
     const payload = {
-      id,
-      patient_id,
-      medicine_id,
-      slot_id,
-      time,
+      slot_ids,
       days,
-      count
+      count_morning, count_afternoon, count_evening, count_night
     }
 
-    const updatdDose = await ScheduleDose.update(payload, { where: { id, patient_id } });
+    const updatedDose = await ScheduleDose.update(payload, { where: { id, patient_id } });
     return successResponse(req, res, {});
   } catch (error) {
     console.log(error);
@@ -87,3 +78,20 @@ export const deleteScheduledDose = async (req, res) => {
     return errorResponse(req, res, error.message);
   }
 };
+
+export const all = async (req, res) => {
+
+  try {
+    const { userId: patient_id } = req.user;
+    const doses = await ScheduleDose.findAll({
+      where: {
+        patient_id
+      },
+      include: [{ model: Medicine, as: 'medicineDetails' }, { model: User, as: 'patientDetails' }]
+    });
+    return successResponse(req, res, { doses });
+  } catch (error) {
+    console.log(error);
+    return errorResponse(req, res, error.message);
+  }
+}

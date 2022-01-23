@@ -1,30 +1,19 @@
 import { errorResponse, successResponse } from '../../../helpers';
-import { UserSlot } from '../../../models';
+import { Slot } from '../../../models';
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 
-export const create = async (req, res) => {
+export const all = async (req, res) => {
     try {
-        const {
-            slot_id, user_id, time
-        } = req.body;
-        
-        const medicine = await Medicine.findOne({
-            where: {
-                [Op.or]: [{ name }, { companyName }]
-            },
+        const page = req.query.page || 1;
+        const limit = 10;
+        const slots = await Slot.findAndCountAll({
+            order: [['id', 'ASC']],
+            offset: (page - 1) * limit,
+            limit,
         });
-        if (medicine) {
-            throw new Error('Medicine exists');
-        }
-
-        const payload = {
-            name, companyName
-        };
-
-        const newCompany = await Medicine.create(payload);
-        return successResponse(req, res, {});
+        return successResponse(req, res, { slots });
     } catch (error) {
         return errorResponse(req, res, error.message);
     }
-}
+};

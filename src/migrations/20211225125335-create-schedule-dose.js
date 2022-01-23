@@ -28,21 +28,20 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      count: {
+      count_morning: {
         type: Sequelize.INTEGER
       },
-      slot_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'Slots',
-          key: 'id'
-        },
-        allowNull: false,
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
+      count_afternoon: {
+        type: Sequelize.INTEGER
       },
-      time: {
-        type: Sequelize.STRING,
+      count_evening: {
+        type: Sequelize.INTEGER
+      },
+      count_night: {
+        type: Sequelize.INTEGER
+      },
+      slot_ids: {
+        type: Sequelize.JSON,
         allowNull: false,
       },
       days:
