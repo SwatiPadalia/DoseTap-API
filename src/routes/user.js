@@ -1,5 +1,7 @@
 import express from 'express';
 import validate from 'express-validation';
+import * as alarmController from '../controllers/user/alarm/alarm.controller';
+import * as alarmValidator from '../controllers/user/alarm/alarm.validator';
 import * as doseController from '../controllers/user/dose/dose.controller';
 import * as doseValidator from '../controllers/user/dose/dose.validator';
 import * as feedController from "../controllers/user/feed/feed.controller";
@@ -41,5 +43,7 @@ router.get('/user-slot', userSlotController.all);
 router.get('/slots', slotController.all);
 
 router.get('/feeds', feedController.all);
+
+router.post('/alarm', validate(alarmValidator.createOrUpdate), alarmController.createOrUpdate);
 
 module.exports = router;
