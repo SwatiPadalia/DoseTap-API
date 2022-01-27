@@ -4,6 +4,8 @@ import * as companyController from '../controllers/admin/company/company.control
 import * as companyValidator from '../controllers/admin/company/company.validator';
 import * as deviceController from '../controllers/admin/device/device.controller';
 import * as deviceValidator from '../controllers/admin/device/device.validator';
+import * as feedController from '../controllers/admin/feed/feed.controller';
+import * as feedValidator from '../controllers/admin/feed/feed.validator';
 import * as medicineController from '../controllers/admin/medicine/medicine.controller';
 import * as medicineValidator from '../controllers/admin/medicine/medicine.validator';
 import * as slotController from '../controllers/admin/slot/slot.controller';
@@ -57,5 +59,11 @@ router.get('/slots', slotController.all);
 router.get('/slot/:id', slotController.findById);
 router.post('/slot', validate(slotValidator.create), slotController.create);
 router.put('/slot/:id', validate(slotValidator.update), slotController.update);
+
+//Feed
+router.get('/feeds', feedController.all);
+router.get('/feed/:id', feedController.findById);
+router.post('/feed', validate(feedValidator.create), feedController.create);
+router.put('/feed/:id', validate(feedValidator.update), feedController.update);
 
 module.exports = router;
