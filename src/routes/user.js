@@ -45,5 +45,6 @@ router.get('/slots', slotController.all);
 router.get('/feeds', feedController.all);
 
 router.post('/alarm', validate(alarmValidator.createOrUpdate), alarmController.createOrUpdate);
+router.get('/alarm', alarmController.get);
 
 module.exports = router;

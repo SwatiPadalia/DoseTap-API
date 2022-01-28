@@ -2,7 +2,7 @@ import axios from 'axios';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { errorResponse, successResponse, uniqueCode, uniqueId } from '../../helpers';
-import { User, UserCareTakerMappings } from '../../models';
+import { User, UserAlarm, UserCareTakerMappings } from '../../models';
 const { Op } = require('sequelize')
 
 export const register = async (req, res) => {
@@ -117,7 +117,13 @@ export const login = async (req, res) => {
             process.env.SECRET,
         );
         delete user.dataValues.password;
-        return successResponse(req, res, { user, token });
+        const alarm = await UserAlarm.findOne({
+            limit: 1, where: {
+                user_id: user.id
+            },
+            order: [['createdAt', 'DESC']]
+        })
+        return successResponse(req, res, { user, token, alarm });
     } catch (error) {
         return errorResponse(req, res, error.message);
     }
