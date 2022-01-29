@@ -17,15 +17,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@babel/preset-env": "^7.4.5",
-    "@babel/register": "^7.4.4",
-    "@babel/runtime": "^7.4.5",
     "@babel/core": "^7.0.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
     "@babel/plugin-transform-runtime": "^7.4.4",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/register": "^7.4.4",
+    "@babel/runtime": "^7.4.5",
+    "aws-sdk": "^2.1066.0",
     "axios": "^0.21.2",
     "babel-loader": "^8.0.0-beta.0",
     "body-parser": "^1.19.0",
+    "busboy": "^1.4.0",
     "cluster": "^0.7.7",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
@@ -42,7 +44,8 @@
     "nodemon": "^1.19.0",
     "os": "^0.1.1",
     "sequelize": "^5.15.1",
-    "sequelize-cli": "^5.4.0"
+    "sequelize-cli": "^5.4.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "babel-jest": "^24.8.0",

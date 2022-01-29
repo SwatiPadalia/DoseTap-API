@@ -2,6 +2,12 @@ import { errorResponse, successResponse } from '../../../helpers';
 import { Feed } from '../../../models';
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
+const AWS = require('aws-sdk');
+const { v4: uuidV4 } = require('uuid');
+const busboy = require('busboy');
+AWS.config.update({ accessKeyId: process.env.ACCESS_KEY_ID, secretAccessKey: process.env.SECRET_ACCESS_KEY });
+const S3 = new AWS.S3();
+
 
 export const create = async (req, res) => {
     try {
@@ -116,3 +122,43 @@ export const all = async (req, res) => {
         return errorResponse(req, res, error.message);
     }
 };
+
+export const fileUpload = (req, res) => {
+    let chunks = [], fName, fType;
+    const bb = busboy({ headers: req.headers });
+    bb.on('file', (name, file, info) => {
+        const { filename, encoding, mimeType } = info;
+        if (mimeType != 'image/png' || mimeType != 'image/jpg' || mimeType != 'image/jpeg') {
+            return errorResponse(req, res, "png/jpg/jpeg only allowed");
+        }
+        fName = filename.replace(/ /g, "_");
+        fType = mimeType;
+        file.on('data', function (data) {
+            chunks.push(data)
+        });
+        file.on('end', function () {
+            console.log('File [' + filename + '] Finished');
+        });
+    });
+    bb.on('finish', function () {
+        const userId = uuidV4();
+        const params = {
+            Bucket: process.env.S3_BUCKET,
+            Key: `${userId}-${fName}`,
+            Body: Buffer.concat(chunks),
+            ACL: 'public-read',
+            ContentType: fType
+        }
+
+        S3.upload(params, (err, s3res) => {
+            if (err) {
+                return errorResponse(req, res, err.message);
+            } else {
+                return successResponse(req, res, { url: s3res.Location });
+            }
+        });
+
+    });
+    req.pipe(bb);
+};
+

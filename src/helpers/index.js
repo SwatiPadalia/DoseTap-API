@@ -43,21 +43,21 @@ export const uniqueId = (length = 13) => {
   return result;
 };
 
-export const uniqueCode = (type, wordlength, numlength, username) => {
+export const uniqueCode = (type, wordLength, numlength, username) => {
 
   // check for the username length
   if (username.length > 1) {
 
     // check for word length 
-    if (typeof (wordlength) !== 'number') {
+    if (typeof (wordLength) !== 'number') {
       return 'word length to chunk must be a number';
     } else {
 
       // check if username length is greater than word length
-      if (username.length > wordlength) {
+      if (username.length > wordLength) {
 
         // extract code word
-        let chunked_name = username.slice(0, wordlength);
+        let chunked_name = username.slice(0, wordLength);
 
         // check for wordcase
         if (type != null) {
