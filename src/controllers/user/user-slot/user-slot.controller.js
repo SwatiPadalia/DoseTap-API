@@ -54,12 +54,22 @@ export const all = async (req, res) => {
             });
 
         } else {
-            const slotsData = await Slot.findAll({
-                order: [['id', 'ASC']],
+            user_slot = user_slot.map(s => {
+                return {
+                    id: s.id,
+                    name: s.slots.name,
+                    type: s.slots.type,
+                    startTime: s.slots.startTime,
+                    endTime: s.slots.endTime,
+                    order: s.slots.order,
+                    displayName: s.slots.displayName,
+                    displayType: s.slots.displayType,
+                    time: s.time,
+                    createdAt: s.createdAt,
+                    updatedAt: s.updatedAt
+                }
             });
-            user_slot = slotsData.map(s => {
-                return s
-            });
+
         }
 
         const slots = {
