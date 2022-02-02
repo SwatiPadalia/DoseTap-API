@@ -175,7 +175,7 @@ export const findById = async (req, res) => {
 export const all = async (req, res) => {
 
     try {
-        let searchFilter = null, statusFilter = null;
+        let searchFilter = null, statusFilter = null, stateFilter = null;
 
         const role = req.query.role;
 
@@ -212,12 +212,23 @@ export const all = async (req, res) => {
             }
         }
 
+        if (req.query.state) {
+            const state = req.query.state;
+            stateFilter = {
+                [Op.or]: [
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('state')), { [Op.like]: `%${state}%` }
+                    )
+                ]
+            }
+        }
+
         const page = req.query.page || 1;
         const limit = 10;
         const sortOrder = sort == -1 ? 'ASC' : 'DESC';
         const users = await User.findAndCountAll({
             where: {
-                [Op.and]: [{ role }, statusFilter === null ? undefined : { status: statusFilter }, searchFilter === null ? undefined : { searchFilter }]
+                [Op.and]: [{ role }, statusFilter === null ? undefined : { status: statusFilter }, searchFilter === null ? undefined : { searchFilter }, stateFilter === null ? undefined : { stateFilter }]
             },
             order: [['id', sortOrder]],
             offset: (page - 1) * limit,

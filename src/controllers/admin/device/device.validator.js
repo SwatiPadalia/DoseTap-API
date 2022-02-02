@@ -22,6 +22,7 @@ export const updateDevice = {
 
 export const tagDevice = {
     body: {
+        device_id: Joi.number().required(),
         company_id: Joi.number().required(),
         doctor_id: Joi.number().required(),
     },
