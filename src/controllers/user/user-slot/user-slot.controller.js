@@ -34,10 +34,10 @@ export const all = async (req, res) => {
         })
 
         if (user_slot.length == 0) {
-            const slots = await Slot.findAll({
+            const slotsData = await Slot.findAll({
                 order: [['id', 'ASC']],
             });
-            user_slot = slots.map(s => {
+            user_slot = slotsData.map(s => {
                 return {
                     id: s.id,
                     name: s.name,
@@ -47,12 +47,26 @@ export const all = async (req, res) => {
                     order: s.order,
                     displayName: s.displayName,
                     displayType: s.displayType,
-                    time: null
+                    time: null,
+                    createdAt: s.createdAt,
+                    updatedAt: s.updatedAt
                 }
             });
-            console.log("🚀 ~ file: user-slot.controller.js ~ line 53 ~ all ~ user_slot", user_slot)
+
+        } else {
+            const slotsData = await Slot.findAll({
+                order: [['id', 'ASC']],
+            });
+            user_slot = slotsData.map(s => {
+                return s
+            });
         }
-        return successResponse(req, res, { user_slot });
+
+        const slots = {
+            count: user_slot.length,
+            rows: user_slot
+        }
+        return successResponse(req, res, { slots });
     } catch (error) {
         return errorResponse(req, res, error.message);
     }
