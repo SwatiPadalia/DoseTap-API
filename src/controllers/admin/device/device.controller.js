@@ -1,5 +1,5 @@
 import { errorResponse, successResponse } from '../../../helpers';
-import { Device, DeviceTagging } from '../../../models';
+import { Device, DeviceUserMapping } from '../../../models';
 const { Op } = require('sequelize')
 
 export const create = async (req, res) => {
@@ -134,19 +134,19 @@ export const deviceTagToCompanyDoctor = async (req, res) => {
             doctor_id,
             device_id
         };
-        const checkDeviceTagging = await DeviceTagging.findOne({
+        const checkDeviceUserMapping = await DeviceUserMapping.findOne({
             where: {
                 company_id,
                 doctor_id,
                 device_id
             },
         });
-        if (!checkDeviceTagging) {
+        if (checkDeviceUserMapping) {
             throw new Error('Device is already mapped to given Doctor & Company');
         }
 
-        const addDeviceTagging = await DeviceTagging.create(payload)
-        return successResponse(req, res, { addDeviceTagging });
+        const addDeviceUserMapping = await DeviceUserMapping.create(payload)
+        return successResponse(req, res, { addDeviceUserMapping });
     } catch (error) {
         return errorResponse(req, res, error.message);
     }

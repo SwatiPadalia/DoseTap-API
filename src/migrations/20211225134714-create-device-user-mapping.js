@@ -24,7 +24,7 @@ module.exports = {
           model: 'Users',
           key: 'id'
         },
-        allowNull: false,
+        allowNull: true,
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
@@ -50,7 +50,7 @@ module.exports = {
       },
       lastSync: {
         type: Sequelize.DATE,
-        allowNull: false,
+        allowNull: true,
       },
       createdAt: {
         allowNull: false,
