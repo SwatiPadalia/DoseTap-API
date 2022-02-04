@@ -43,7 +43,7 @@ export const update = async (req, res) => {
         }
 
         const payload = {
-            name, title, description, shortDescription, url, type
+            title, description, shortDescription, url, type
         };
 
         const updatedFeed = await Feed.update(payload, { where: { id } });
