@@ -12,11 +12,11 @@ const S3 = new AWS.S3();
 export const create = async (req, res) => {
     try {
         const {
-            name, title, description, shortDescription, url, type
+            title, description, shortDescription, url, type
         } = req.body;
 
         const payload = {
-            name, title, description, shortDescription, url, type
+            title, description, shortDescription, url, type
         };
 
         const newFeed = await Feed.create(payload);
@@ -30,7 +30,7 @@ export const update = async (req, res) => {
     try {
         const id = req.params.id;
         const {
-            name, title, description, shortDescription, url, type
+            title, description, shortDescription, url, type
         } = req.body;
 
         const feed = await Feed.findOne({
@@ -84,7 +84,7 @@ export const all = async (req, res) => {
             searchFilter = {
                 [Op.or]: [
                     sequelize.where(
-                        sequelize.fn('LOWER', sequelize.col('name')), { [Op.like]: `%${search}%` }
+                        sequelize.fn('LOWER', sequelize.col('title')), { [Op.like]: `%${search}%` }
                     )
                 ]
             }

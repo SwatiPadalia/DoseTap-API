@@ -2,7 +2,6 @@ const Joi = require('joi');
 
 export const create = {
     body: {
-        name: Joi.string().required(),
         title: Joi.string().required(),
         description: Joi.string().required(),
         shortDescription: Joi.string().required(),
@@ -13,7 +12,6 @@ export const create = {
 
 export const update = {
     body: {
-        name: Joi.string().required(),
         title: Joi.string().required(),
         description: Joi.string().required(),
         shortDescription: Joi.string().optional(),
