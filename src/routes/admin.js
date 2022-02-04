@@ -67,6 +67,6 @@ router.get('/feed/:id', feedController.findById);
 router.post('/feed', validate(feedValidator.create), feedController.create);
 router.put('/feed/:id', validate(feedValidator.update), feedController.update);
 router.post('/upload', feedController.fileUpload);
-router.put('/user/:id/status', feedController.statusUpdate);
+router.put('/feed/:id/status', feedController.statusUpdate);
 
 module.exports = router;
