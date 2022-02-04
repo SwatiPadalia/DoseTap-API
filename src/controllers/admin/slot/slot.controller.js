@@ -1,6 +1,7 @@
 import { errorResponse, successResponse } from '../../../helpers';
 import { Slot } from '../../../models';
 const { Op } = require('sequelize')
+const sequelize = require('sequelize');
 
 export const create = async (req, res) => {
     try {
@@ -74,13 +75,35 @@ export const findById = async (req, res) => {
 
 export const all = async (req, res) => {
     try {
+
+        let searchFilter = null, statusFilter = null;
+
+        const sort = req.query.sort || -1;
+
+        if (req.query.search) {
+            const search = req.query.search;
+
+            searchFilter = {
+                [Op.or]: [
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('name')), { [Op.like]: `%${search}%` }
+                    )
+                ]
+            }
+        }
+
         const page = req.query.page || 1;
         const limit = 10;
+        const sortOrder = sort == -1 ? 'ASC' : 'DESC';
         const slots = await Slot.findAndCountAll({
-            order: [['id', 'ASC']],
+            where: {
+                [Op.and]: [searchFilter === null ? undefined : { searchFilter }]
+            },
+            order: [['id', sortOrder]],
             offset: (page - 1) * limit,
             limit,
         });
+
         return successResponse(req, res, { slots });
     } catch (error) {
         return errorResponse(req, res, error.message);
