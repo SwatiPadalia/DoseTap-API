@@ -1,6 +1,7 @@
 import { errorResponse, successResponse } from '../../../helpers';
 import { Medicine } from '../../../models';
 const { Op } = require('sequelize')
+const sequelize = require('sequelize');
 
 export const create = async (req, res) => {
     try {
@@ -74,9 +75,38 @@ export const findById = async (req, res) => {
 
 export const all = async (req, res) => {
     try {
+        let searchFilter = null, statusFilter = null;
+
+        const sort = req.query.sort || -1;
+
+        if (req.query.search) {
+            const search = req.query.search;
+
+            searchFilter = {
+                [Op.or]: [
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('name')), { [Op.like]: `%${search}%` }
+                    )
+                ]
+            }
+        }
+
+        if (req.query.status) {
+            const status = req.query.status;
+            if (status == 1) {
+                statusFilter = true
+            } else {
+                statusFilter = false
+            }
+        }
+
         const page = req.query.page || 1;
         const limit = 10;
+        const sortOrder = sort == -1 ? 'ASC' : 'DESC';
         const medicines = await Medicine.findAndCountAll({
+            where: {
+                [Op.and]: [statusFilter === null ? undefined : { status: statusFilter }, searchFilter === null ? undefined : { searchFilter }]
+            },
             order: [['createdAt', 'DESC'], ['id', 'ASC']],
             offset: (page - 1) * limit,
             limit,

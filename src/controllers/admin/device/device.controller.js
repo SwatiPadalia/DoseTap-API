@@ -1,6 +1,7 @@
 import { errorResponse, successResponse } from '../../../helpers';
 import { Device, DeviceUserMapping } from '../../../models';
-const { Op } = require('sequelize')
+const { Op } = require('sequelize');
+const sequelize = require('sequelize');
 
 export const create = async (req, res) => {
     try {

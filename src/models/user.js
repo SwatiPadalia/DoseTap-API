@@ -45,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
       role: {
         type: DataTypes.ENUM,
         allowNull: false,
-        values: ['admin', 'user', 'caretaker', 'doctor']
+        values: ['admin', 'user', 'caretaker', 'doctor', 'company']
       },
       verifyToken: {
         type: DataTypes.STRING,
