@@ -42,6 +42,30 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   DeviceUserMapping.associate = function (models) {
     // associations can be defined here
+    DeviceUserMapping.belongsTo(models.Device,
+      {
+        foreignKey: 'device_id',
+        as: 'device',
+      }
+    );
+    DeviceUserMapping.belongsTo(models.User,
+      {
+        foreignKey: 'patient_id',
+        as: 'patient',
+      }
+    );
+    DeviceUserMapping.belongsTo(models.Company,
+      {
+        foreignKey: 'company_id',
+        as: 'company',
+      }
+    );
+    DeviceUserMapping.belongsTo(models.User,
+      {
+        foreignKey: 'doctor_id',
+        as: 'doctor',
+      }
+    );
   };
   return DeviceUserMapping;
 };
