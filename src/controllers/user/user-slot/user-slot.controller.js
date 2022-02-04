@@ -56,7 +56,7 @@ export const all = async (req, res) => {
         } else {
             user_slot = user_slot.map(s => {
                 return {
-                    id: s.id,
+                    id: s.slot_id,
                     name: s.slots.name,
                     type: s.slots.type,
                     startTime: s.slots.startTime,
