@@ -23,7 +23,7 @@ export const findById = async (req, res) => {
 export const all = async (req, res) => {
     try {
 
-        let searchFilter = null, statusFilter = null;
+        let searchFilter = null;
 
         const sort = req.query.sort || -1;
 
@@ -39,22 +39,12 @@ export const all = async (req, res) => {
             }
         }
 
-        if (req.query.status) {
-            const status = req.query.status;
-            if (status == 1) {
-                statusFilter = true
-            } else {
-                statusFilter = false
-            }
-        }
-
-
         const page = req.query.page || 1;
         const limit = 10;
         const sortOrder = sort == -1 ? 'ASC' : 'DESC';
         const feeds = await Feed.findAndCountAll({
             where: {
-                [Op.and]: [statusFilter === null ? undefined : { status: statusFilter }, searchFilter === null ? undefined : { searchFilter }]
+                [Op.and]: [{ status: true }, searchFilter === null ? undefined : { searchFilter }]
             },
             order: [['id', sortOrder]],
             offset: (page - 1) * limit,

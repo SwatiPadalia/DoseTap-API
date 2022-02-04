@@ -163,3 +163,30 @@ export const fileUpload = (req, res) => {
     req.pipe(bb);
 };
 
+export const statusUpdate = async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        const feed = await Feed.findOne({
+            where: {
+                id
+            },
+        });
+        if (!feed) {
+            throw new Error('Feed do not exist');
+        }
+
+        let payload = {
+            status: !feed.status
+        };
+
+        const updated = await Feed.update(payload, { where: { id } });
+
+        feed.status = !feed.status
+        return successResponse(req, res, { feed });
+    } catch (error) {
+        console.log(error)
+        return errorResponse(req, res, error.message);
+    }
+}
+
