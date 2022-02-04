@@ -44,6 +44,7 @@ router.get('/companies', companyController.all);
 router.get('/company/:id', companyController.findById);
 router.post('/company', validate(companyValidator.createCompany), companyController.create);
 router.put('/company/:id', validate(companyValidator.updateCompany), companyController.update);
+router.get('/company/:id/users', companyController.allCompanyUser)
 
 
 // Medicine

@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { errorResponse, successResponse, uniqueCode, uniqueId } from '../../../helpers';
-import { User, UserCareTakerMappings } from '../../../models';
+import { Company, User, UserCareTakerMappings } from '../../../models';
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 
@@ -230,6 +230,7 @@ export const all = async (req, res) => {
             where: {
                 [Op.and]: [{ role }, statusFilter === null ? undefined : { status: statusFilter }, searchFilter === null ? undefined : { searchFilter }, stateFilter === null ? undefined : { stateFilter }]
             },
+            include: [{ model: Company, as: 'company' }],
             order: [['id', sortOrder]],
             offset: (page - 1) * limit,
             limit,

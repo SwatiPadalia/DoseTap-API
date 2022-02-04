@@ -1,5 +1,5 @@
 import { errorResponse, successResponse } from '../../../helpers';
-import { Company } from '../../../models';
+import { Company, User } from '../../../models';
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 
@@ -116,6 +116,66 @@ export const all = async (req, res) => {
                 ...companies,
                 currentPage: parseInt(page),
                 totalPage: Math.ceil(companies.count / limit)
+            }
+        });
+    } catch (error) {
+        return errorResponse(req, res, error.message);
+    }
+};
+
+export const allCompanyUser = async (req, res) => {
+    try {
+
+        const id = req.params.id;
+
+        let searchFilter = null, statusFilter = null;
+
+        const sort = req.query.sort || -1;
+
+        if (req.query.search) {
+            const search = req.query.search;
+
+            searchFilter = {
+                [Op.or]: [
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('firstName')), { [Op.like]: `%${search}%` }
+                    ),
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('email')), { [Op.like]: `%${search}%` }
+                    ),
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('phone')), { [Op.like]: `%${search}%` }
+                    )
+                ]
+            }
+        }
+
+        if (req.query.status) {
+            const status = req.query.status;
+            if (status == 1) {
+                statusFilter = true
+            } else {
+                statusFilter = false
+            }
+        }
+
+
+        const page = req.query.page || 1;
+        const limit = 10;
+        const sortOrder = sort == -1 ? 'ASC' : 'DESC';
+        const users = await User.findAndCountAll({
+            where: {
+                [Op.and]: [{ company_id: id }, statusFilter === null ? undefined : { status: statusFilter }, searchFilter === null ? undefined : { searchFilter }]
+            },
+            order: [['id', sortOrder]],
+            offset: (page - 1) * limit,
+            limit,
+        });
+        return successResponse(req, res, {
+            users: {
+                ...users,
+                currentPage: parseInt(page),
+                totalPage: Math.ceil(users.count / limit)
             }
         });
     } catch (error) {
