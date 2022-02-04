@@ -5,12 +5,16 @@ const sequelize = require('sequelize');
 
 export const create = async (req, res) => {
     try {
-        const {
+        let {
             name, companyName
         } = req.body;
+
+        name = name.replace(/(\w)(\w*)/g, (g0, g1, g2) => { return g1.toUpperCase() + g2.toLowerCase(); });
+        companyName = companyName.replace(/(\w)(\w*)/g, (g0, g1, g2) => { return g1.toUpperCase() + g2.toLowerCase(); });
+
         const medicine = await Medicine.findOne({
             where: {
-                [Op.or]: [{ name }, { companyName }]
+                [Op.and]: [{ name }, { companyName }]
             },
         });
         if (medicine) {
@@ -21,8 +25,13 @@ export const create = async (req, res) => {
             name, companyName
         };
 
-        const newCompany = await Medicine.create(payload);
-        return successResponse(req, res, {});
+        const createdMedicine = await Medicine.create(payload);
+        const newMedicine = await Medicine.findOne({
+            where: {
+                name, companyName
+            }
+        })
+        return successResponse(req, res, { newMedicine });
     } catch (error) {
         return errorResponse(req, res, error.message);
     }
