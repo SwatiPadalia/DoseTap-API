@@ -15,7 +15,6 @@ export const update = {
         title: Joi.string().required(),
         description: Joi.string().required(),
         shortDescription: Joi.string().optional(),
-        status: Joi.string().optional(),
         url: Joi.string().optional(),
         type: Joi.string().required(),
     }
