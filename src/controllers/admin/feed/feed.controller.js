@@ -128,7 +128,8 @@ export const fileUpload = (req, res) => {
     const bb = busboy({ headers: req.headers });
     bb.on('file', (name, file, info) => {
         const { filename, encoding, mimeType } = info;
-        if (mimeType != 'image/png' || mimeType != 'image/jpg' || mimeType != 'image/jpeg') {
+        console.log("🚀 ~ file: feed.controller.js ~ line 131 ~ bb.on ~ mimeType", mimeType)
+        if (mimeType != 'image/png' && mimeType != 'image/jpg' && mimeType != 'image/jpeg') {
             return errorResponse(req, res, "png/jpg/jpeg only allowed");
         }
         fName = filename.replace(/ /g, "_");
