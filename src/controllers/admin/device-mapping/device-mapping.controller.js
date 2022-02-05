@@ -97,6 +97,11 @@ export const completeMapping = async (req, res) => {
         const limit = 10;
         const sortOrder = sort == -1 ? 'ASC' : 'DESC';
         const deviceMappings = await DeviceUserMapping.findAndCountAll({
+            where: {
+                patient_id: {
+                    [Op.ne]: null
+                }
+            },
             include: [
                 {
                     model: User, as: 'doctor',
