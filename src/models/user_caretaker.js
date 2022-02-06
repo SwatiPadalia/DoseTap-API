@@ -23,7 +23,18 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {});
   UserCareTakerMappings.associate = function (models) {
-    // associations can be defined here
+    UserCareTakerMappings.belongsTo(models.User,
+      {
+        foreignKey: 'patient_id',
+        as: 'patient',
+      }
+    );
+    UserCareTakerMappings.belongsTo(models.User,
+      {
+        foreignKey: 'caretaker_id',
+        as: 'caretaker',
+      }
+    );
   };
   return UserCareTakerMappings;
 };

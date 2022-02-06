@@ -249,3 +249,63 @@ export const all = async (req, res) => {
 };
 
 
+export const caretakerMapping = async (req, res) => {
+
+    try {
+        let searchFilter = null;
+
+        const sort = req.query.sort || -1;
+
+        if (req.query.search) {
+            const search = req.query.search;
+
+            searchFilter = {
+                [Op.or]: [
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('caretaker.firstName')), { [Op.like]: `%${search}%` }
+                    ),
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('caretaker.email')), { [Op.like]: `%${search}%` }
+                    ),
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('caretaker.phone')), { [Op.like]: `%${search}%` }
+                    )
+                ]
+            }
+        }
+
+        if (req.query.status) {
+            const status = req.query.status;
+            if (status == 1) {
+                statusFilter = true
+            } else {
+                statusFilter = false
+            }
+        }
+
+
+        const page = req.query.page || 1;
+        const limit = 10;
+        const sortOrder = sort == -1 ? 'ASC' : 'DESC';
+        const user_caretaker = await UserCareTakerMappings.findAndCountAll({
+            where: {
+                [Op.and]: [searchFilter === null ? undefined : { searchFilter }]
+            },
+            include: [{ model: User, as: 'patient' }, { model: User, as: 'caretaker' }],
+            order: [['id', sortOrder]],
+            offset: (page - 1) * limit,
+            limit,
+        });
+        return successResponse(req, res, {
+            users: {
+                ...user_caretaker,
+                currentPage: parseInt(page),
+                totalPage: Math.ceil(user_caretaker.count / limit)
+            }
+        });
+    } catch (error) {
+        console.log("🚀 ~ file: user.controller.js ~ line 307 ~ caretakerMapping ~ error", error)
+
+        return errorResponse(req, res, error.message);
+    }
+}

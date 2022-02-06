@@ -70,4 +70,6 @@ router.put('/feed/:id', validate(feedValidator.update), feedController.update);
 router.post('/upload', feedController.fileUpload);
 router.put('/feed/:id/status', feedController.statusUpdate);
 
+router.get('/caretaker-mapping', userController.caretakerMapping);
+
 module.exports = router;
