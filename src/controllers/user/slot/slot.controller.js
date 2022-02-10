@@ -12,7 +12,13 @@ export const all = async (req, res) => {
             offset: (page - 1) * limit,
             limit,
         });
-        return successResponse(req, res, { slots });
+        return successResponse(req, res, {
+            slots: {
+                ...slots,
+                currentPage: parseInt(page),
+                totalPage: Math.ceil(slots.count / limit)
+            }
+        });
     } catch (error) {
         return errorResponse(req, res, error.message);
     }

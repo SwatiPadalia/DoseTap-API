@@ -105,7 +105,13 @@ export const all = async (req, res) => {
             offset: (page - 1) * limit,
             limit,
         });
-        return successResponse(req, res, { medicines });
+        return successResponse(req, res, {
+            medicines: {
+                ...medicines,
+                currentPage: parseInt(page),
+                totalPage: Math.ceil(medicines.count / limit)
+            }
+        });
     } catch (error) {
         return errorResponse(req, res, error.message);
     }
