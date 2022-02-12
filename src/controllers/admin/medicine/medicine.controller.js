@@ -164,7 +164,7 @@ export const csvBulkImport = async (req, res) => {
         let path = __basedir + "/uploads/" + req.file.filename;
 
         fs.createReadStream(path)
-            .pipe(csv.parse({ headers: true }))
+            .pipe(csv.parse({ headers: true, discardUnmappedColumns: true }))
             .on("error", (error) => {
                 throw error.message;
             })
