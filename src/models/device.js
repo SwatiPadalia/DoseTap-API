@@ -14,6 +14,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
     },
+    firmwareVersion: {
+      type: DataTypes.STRING,
+    },
     isSold: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,

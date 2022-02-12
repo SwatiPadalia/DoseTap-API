@@ -61,7 +61,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       caretaker_code: {
         type: DataTypes.STRING,
-      }
+      },
+      appVersion: {
+        type: DataTypes.STRING,
+      },
     },
     {
       defaultScope: {
