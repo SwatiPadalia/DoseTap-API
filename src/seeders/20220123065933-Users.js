@@ -43,7 +43,7 @@ module.exports = {
         city: "Delhi",
         gender: "male",
         age: 23,
-        caretaker_code: "SOUR123",
+        caretaker_code: "USER123",
         state: "West Bengal",
         phone: '8722682246',
         createdAt: new Date(),
