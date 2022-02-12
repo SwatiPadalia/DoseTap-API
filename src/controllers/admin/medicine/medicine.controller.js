@@ -2,6 +2,8 @@ import { errorResponse, successResponse } from '../../../helpers';
 import { Medicine } from '../../../models';
 const { Op } = require('sequelize')
 const sequelize = require('sequelize');
+const fs = require("fs");
+const csv = require("fast-csv");
 
 export const create = async (req, res) => {
     try {
@@ -147,6 +149,40 @@ export const statusUpdate = async (req, res) => {
         return successResponse(req, res, { medicine });
     } catch (error) {
         console.log(error)
+        return errorResponse(req, res, error.message);
+    }
+}
+
+export const csvBulkImport = async (req, res) => {
+    console.log('I am called')
+    try {
+        if (req.file == undefined) {
+            return errorResponse(req, res, 'Please upload a CSV file!');
+        }
+
+        let medicines = [];
+        let path = __basedir + "/uploads/" + req.file.filename;
+
+        fs.createReadStream(path)
+            .pipe(csv.parse({ headers: true }))
+            .on("error", (error) => {
+                throw error.message;
+            })
+            .on("data", (row) => {
+                console.log("🚀 ~ file: medicine.controller.js ~ line 171 ~ .on ~ row", row)
+                medicines.push(row);
+            })
+            .on("end", () => {
+                Medicine.bulkCreate(medicines)
+                    .then(() => {
+                        return successResponse(req, res, {});
+                    })
+                    .catch((error) => {
+                        return errorResponse(req, res, "Fail to import data into database!");
+                    });
+            });
+    } catch (error) {
+        console.log(error);
         return errorResponse(req, res, error.message);
     }
 }

@@ -10,7 +10,6 @@ import publicRoutes from './src/routes/public';
 import userRoutes from './src/routes/user';
 
 
-
 dotenv.config();
 require('./src/config/sequelize');
 
@@ -28,4 +27,7 @@ app.use('/api/user', userMiddleware, userRoutes);
 app.use('/api/admin', userMiddleware, adminMiddleware, adminRoutes);
 app.use(errorHandler);
 
+global.__basedir = __dirname;
+console.log("🚀 ~ file: app.js ~ line 31 ~ __basedir", __basedir)
+app.use(express.urlencoded({ extended: true }));
 module.exports = app;

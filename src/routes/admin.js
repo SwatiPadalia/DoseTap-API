@@ -13,7 +13,7 @@ import * as slotController from '../controllers/admin/slot/slot.controller';
 import * as slotValidator from '../controllers/admin/slot/slot.validator';
 import * as userController from '../controllers/admin/user/user.controller';
 import * as userValidator from '../controllers/admin/user/user.validator';
-
+import uploadMiddleware from '../middleware/upload';
 
 const router = express.Router();
 
@@ -72,4 +72,7 @@ router.put('/feed/:id/status', feedController.statusUpdate);
 
 router.get('/caretaker-mapping', userController.caretakerMapping);
 
+
+
+router.post("/medicine-upload", uploadMiddleware.single("file"), medicineController.csvBulkImport);
 module.exports = router;

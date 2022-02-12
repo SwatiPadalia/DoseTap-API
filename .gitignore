@@ -4,3 +4,4 @@ public/node_modules
 coverage
 yarn-error.log
 deploy-dev.sh
+*.csv
