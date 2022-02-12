@@ -10,7 +10,7 @@ export const register = async (req, res) => {
     try {
         let patient, doctor;
         const {
-            firstName, lastName, age, gender, email, password, phone, city, role, caretaker_code, state
+            firstName, lastName, age, gender, email, password, phone, city, role, reference_code, state
         } = req.body;
         if (process.env.IS_GOOGLE_AUTH_ENABLE === 'true') {
             if (!req.body.code) {
@@ -45,7 +45,7 @@ export const register = async (req, res) => {
         if (role == "user") {
             const doctorWithActivationCode = await User.findOne({
                 where: {
-                    caretaker_code,
+                    reference_code,
                     role: 'doctor'
                 },
             });
@@ -57,12 +57,20 @@ export const register = async (req, res) => {
         if (role == "caretaker") {
             const userWithActivationCode = await User.findOne({
                 where: {
-                    caretaker_code,
+                    reference_code,
                     role: 'user'
                 },
             });
             if (!userWithActivationCode)
                 throw new Error('Activation Code do not exist');
+
+            const checkPatientAlreadyMapped = await UserCareTakerMappings.findOne({
+                where: {
+                    patient_id: userWithActivationCode.id,
+                },
+            });
+            if (checkPatientAlreadyMapped)
+                throw new Error('Patient already has a care giver');
             patient = userWithActivationCode;
         }
 
@@ -81,7 +89,7 @@ export const register = async (req, res) => {
             verifyToken: uniqueId(),
             role,
             gender,
-            caretaker_code: (role == "user" || role == "doctor") ? uniqueCode('lowercase', 4, 4, randomstring.generate(10)) : null,
+            reference_code: (role == "user" || role == "doctor") ? uniqueCode('lowercase', 4, 4, randomstring.generate(10)) : null,
             phone,
             city,
             state

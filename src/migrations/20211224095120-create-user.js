@@ -61,7 +61,7 @@ module.exports = {
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
     },
-    caretaker_code: {
+    reference_code: {
       type: Sequelize.STRING,
     },
     verifyToken: {
@@ -78,6 +78,10 @@ module.exports = {
     },
     lastSync: {
       type: Sequelize.DATE
+    },
+    appVersion: {
+      type: Sequelize.STRING,
+      defaultValue: null
     },
     createdAt: {
       allowNull: false,

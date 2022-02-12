@@ -59,7 +59,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
       },
-      caretaker_code: {
+      reference_code: {
         type: DataTypes.STRING,
       },
       appVersion: {

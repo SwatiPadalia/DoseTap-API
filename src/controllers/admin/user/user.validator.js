@@ -11,7 +11,7 @@ export const createUser = {
         role: Joi.string().required().valid('user', 'admin', 'caretaker', 'doctor'),
         city: Joi.string().required(),
         state: Joi.string().required(),
-        caretaker_code: Joi.string().when("role", {
+        reference_code: Joi.string().when("role", {
             is: "caretaker",
             then: Joi.required()
         }).concat(Joi.string().when("role", {

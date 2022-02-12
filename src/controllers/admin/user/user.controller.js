@@ -9,7 +9,7 @@ export const create = async (req, res) => {
     try {
         let patient, doctor;
         const {
-            firstName, lastName, age, gender, email, password, phone, city, role = "patient", caretaker_code, state
+            firstName, lastName, age, gender, email, password, phone, city, role = "patient", reference_code, state
         } = req.body;
 
         const user = await User.scope('withSecretColumns').findOne({
@@ -24,7 +24,7 @@ export const create = async (req, res) => {
         if (role == "user") {
             const doctorWithActivationCode = await User.findOne({
                 where: {
-                    caretaker_code,
+                    reference_code,
                     role: 'doctor'
                 },
             });
@@ -36,11 +36,19 @@ export const create = async (req, res) => {
         if (role == "caretaker") {
             const userWithActivationCode = await User.findOne({
                 where: {
-                    caretaker_code
+                    reference_code
                 },
             });
             if (!userWithActivationCode)
                 throw new Error('Activation Code do not exist');
+
+            const checkPatientAlreadyMapped = await UserCareTakerMappings.findOne({
+                where: {
+                    patient_id: userWithActivationCode.id,
+                },
+            });
+            if (checkPatientAlreadyMapped)
+                throw new Error('Patient already has a care giver');
             patient = userWithActivationCode;
         }
         const reqPass = crypto
@@ -57,7 +65,7 @@ export const create = async (req, res) => {
             isVerified: false,
             verifyToken: uniqueId(),
             role,
-            caretaker_code: (role == "user" || role == "doctor") ? uniqueCode('lowercase', 4, 4, randomstring.generate(10)) : null,
+            reference_code: (role == "user" || role == "doctor") ? uniqueCode('lowercase', 4, 4, randomstring.generate(10)) : null,
             gender,
             age,
             phone,
