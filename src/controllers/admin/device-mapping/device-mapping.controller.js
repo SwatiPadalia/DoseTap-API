@@ -37,9 +37,6 @@ export const partialMapping = async (req, res) => {
         const deviceMappings = await DeviceUserMapping.findAndCountAll({
             include: [
                 {
-                    model: User, as: 'doctor',
-                },
-                {
                     model: Device, as: 'device',
                     where: {
                         [Op.and]: [searchDeviceFilter === null ? undefined : { searchDeviceFilter }]

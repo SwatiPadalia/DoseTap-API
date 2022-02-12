@@ -1,12 +1,13 @@
 import crypto from 'crypto';
 import { errorResponse, successResponse, uniqueCode, uniqueId } from '../../../helpers';
-import { Company, User, UserCareTakerMappings } from '../../../models';
+import { Company, User, UserCareTakerMappings, UserDoctorMappings } from '../../../models';
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
+const randomstring = require("randomstring");
 
 export const create = async (req, res) => {
     try {
-        let patient;
+        let patient, doctor;
         const {
             firstName, lastName, age, gender, email, password, phone, city, role = "patient", caretaker_code, state
         } = req.body;
@@ -18,6 +19,18 @@ export const create = async (req, res) => {
         });
         if (user) {
             throw new Error('User already exists with same email or phone');
+        }
+
+        if (role == "user") {
+            const doctorWithActivationCode = await User.findOne({
+                where: {
+                    caretaker_code,
+                    role: 'doctor'
+                },
+            });
+            if (!doctorWithActivationCode)
+                throw new Error('Activation Code do not exist');
+            doctor = doctorWithActivationCode;
         }
 
         if (role == "caretaker") {
@@ -44,16 +57,13 @@ export const create = async (req, res) => {
             isVerified: false,
             verifyToken: uniqueId(),
             role,
-            caretaker_code: role == "user" ? uniqueCode('lowercase', 4, 3, firstName) : null,
+            caretaker_code: (role == "user" || role == "doctor") ? uniqueCode('lowercase', 4, 4, randomstring.generate(10)) : null,
             gender,
             age,
             phone,
             city,
             state
         };
-        if (role == "patient") {
-            payload.uniqueCode = uniqueCode('lowercase', 3, 3, firstName);
-        }
         const newUser = await User.create(payload);
 
         console.log("role", role);
@@ -64,6 +74,16 @@ export const create = async (req, res) => {
             }
             const newUserCaretakerMapping = await UserCareTakerMappings.create(mappingPayload);
         }
+
+        if (role == "user") {
+            const doctorMappingPayload = {
+                patient_id: newUser.id,
+                doctor_id: doctor.id
+            }
+            console.log("doctorMappingPayload", doctorMappingPayload)
+            const newUserDoctorMapping = await UserDoctorMappings.create(doctorMappingPayload);
+        }
+
         return successResponse(req, res, { newUser });
     } catch (error) {
         return errorResponse(req, res, error.message);

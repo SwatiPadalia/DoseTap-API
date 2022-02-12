@@ -14,7 +14,10 @@ export const createUser = {
         caretaker_code: Joi.string().when("role", {
             is: "caretaker",
             then: Joi.required()
-        }),
+        }).concat(Joi.string().when("role", {
+            is: "user",
+            then: Joi.required()
+        })),
         phone: Joi.string().max(10).required()
             .options({
                 language: {

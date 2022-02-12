@@ -153,7 +153,7 @@ export const all = async (req, res) => {
 };
 
 
-export const deviceTagToCompanyDoctor = async (req, res) => {
+export const deviceTagToCompany = async (req, res) => {
     try {
         const {
             company_id, doctor_id, device_id
@@ -161,13 +161,11 @@ export const deviceTagToCompanyDoctor = async (req, res) => {
 
         const payload = {
             company_id,
-            doctor_id,
             device_id
         };
         const checkDeviceUserMapping = await DeviceUserMapping.findOne({
             where: {
                 company_id,
-                doctor_id,
                 device_id
             },
         });

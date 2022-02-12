@@ -35,7 +35,7 @@ router.get('/device/:id', deviceController.findById);
 router.post('/device', validate(deviceValidator.createDevice), deviceController.create);
 router.put('/device/:id', validate(deviceValidator.updateDevice), deviceController.update);
 router.put('/device/:id/status', deviceController.statusUpdate);
-router.post('/mappings', validate(deviceValidator.tagDevice), deviceController.deviceTagToCompanyDoctor);
+router.post('/mappings', validate(deviceValidator.tagDevice), deviceController.deviceTagToCompany);
 router.get('/mappings', deviceUserMappingController.partialMapping);
 router.get('/complete-mappings', deviceUserMappingController.completeMapping);
 

@@ -2,12 +2,13 @@ import axios from 'axios';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { errorResponse, successResponse, uniqueCode, uniqueId } from '../../helpers';
-import { User, UserAlarm, UserCareTakerMappings } from '../../models';
+import { User, UserAlarm, UserCareTakerMappings, UserDoctorMappings } from '../../models';
 const { Op } = require('sequelize')
+const randomstring = require("randomstring");
 
 export const register = async (req, res) => {
     try {
-        let patient;
+        let patient, doctor;
         const {
             firstName, lastName, age, gender, email, password, phone, city, role, caretaker_code, state
         } = req.body;
@@ -41,10 +42,23 @@ export const register = async (req, res) => {
             throw new Error('User already exists with same email or phone');
         }
 
+        if (role == "user") {
+            const doctorWithActivationCode = await User.findOne({
+                where: {
+                    caretaker_code,
+                    role: 'doctor'
+                },
+            });
+            if (!doctorWithActivationCode)
+                throw new Error('Activation Code do not exist');
+            doctor = doctorWithActivationCode;
+        }
+
         if (role == "caretaker") {
             const userWithActivationCode = await User.findOne({
                 where: {
-                    caretaker_code
+                    caretaker_code,
+                    role: 'user'
                 },
             });
             if (!userWithActivationCode)
@@ -56,6 +70,7 @@ export const register = async (req, res) => {
             .createHash('md5')
             .update(password)
             .digest('hex');
+
         const payload = {
             email,
             firstName,
@@ -66,7 +81,7 @@ export const register = async (req, res) => {
             verifyToken: uniqueId(),
             role,
             gender,
-            caretaker_code: role == "user" ? uniqueCode('lowercase', 4, 3, firstName) : null,
+            caretaker_code: (role == "user" || role == "doctor") ? uniqueCode('lowercase', 4, 4, randomstring.generate(10)) : null,
             phone,
             city,
             state
@@ -81,6 +96,17 @@ export const register = async (req, res) => {
             console.log("mappingPayload", mappingPayload)
             const newUserCaretakerMapping = await UserCareTakerMappings.create(mappingPayload);
         }
+
+        if (role == "user") {
+            const doctorMappingPayload = {
+                patient_id: newUser.id,
+                doctor_id: doctor.id
+            }
+            console.log("doctorMappingPayload", doctorMappingPayload)
+            const newUserDoctorMapping = await UserDoctorMappings.create(doctorMappingPayload);
+        }
+
+
         return successResponse(req, res, { newUser });
     } catch (error) {
         console.log(error)
