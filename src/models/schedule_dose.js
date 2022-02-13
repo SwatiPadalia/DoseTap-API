@@ -22,16 +22,16 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE'
     },
     count_morning: {
-      type: DataTypes.INTEGER
+      type: DataTypes.JSON
     },
     count_afternoon: {
-      type: DataTypes.INTEGER
+      type: DataTypes.JSON
     },
     count_evening: {
-      type: DataTypes.INTEGER
+      type: DataTypes.JSON
     },
     count_night: {
-      type: DataTypes.INTEGER
+      type: DataTypes.JSON
     },
     slot_ids: {
       type: DataTypes.JSON,

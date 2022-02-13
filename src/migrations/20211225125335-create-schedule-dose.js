@@ -29,16 +29,16 @@ module.exports = {
         onDelete: 'CASCADE'
       },
       count_morning: {
-        type: Sequelize.INTEGER
+        type: Sequelize.JSON
       },
       count_afternoon: {
-        type: Sequelize.INTEGER
+        type: Sequelize.JSON
       },
       count_evening: {
-        type: Sequelize.INTEGER
+        type: Sequelize.JSON
       },
       count_night: {
-        type: Sequelize.INTEGER
+        type: Sequelize.JSON
       },
       slot_ids: {
         type: Sequelize.JSON,

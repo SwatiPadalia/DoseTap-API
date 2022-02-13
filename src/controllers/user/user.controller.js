@@ -90,3 +90,65 @@ export const update = async (req, res) => {
     return errorResponse(req, res, err.message);
   }
 };
+
+
+// export const syncData = async (req, res) => {
+//   try {
+//     const { userId } = req.user;
+//     const lastSync = new Date().toISOString().slice(0, 19).replace('T', ' ');
+//     const {
+//       appVersion,
+//       firmwareVersion,
+//       serialNumber,
+//     } = req.body;
+
+//     const user = await User.findOne({ where: { id: userId } });
+//     if (!user)
+//       throw new Error('User do not exist');
+
+//     const updatedUser = await User.update({ appVersion, lastSync }, { where: { id: userId } });
+    
+//     const device = await Device.findOne({
+//       where: {
+//         serialNumber
+//       }
+//     })
+//     if (!device)
+//       throw new Error('Device do not exist');
+
+    
+//     const deviceMapping = await DeviceUserMapping.findOne({
+//       where: {
+//         device_id: device.id,
+//       }
+//     })
+
+//     if (!deviceMapping)
+//       throw new Error('Device is not Mapped do not exist');
+    
+     
+//     if (deviceMapping.patient_id == userId){
+//       const updateDeviceMapping = await DeviceUserMapping.update({ lastSync}, { where: { device_id: device.id } });
+//     }
+//     else
+//     {
+//       const userDoctorMapping = await UserDoctorMapping.findOne({
+//         where:{
+//           patient_id: userId
+//         }
+//       })
+
+//       const newDeviceMapping = await DeviceUserMapping.create({
+//         device_id: device.id,
+//         patient_id: userId,
+//         doctor_id: userDoctorMapping.doctor_id
+//       });
+//     }
+
+//     return successResponse(req, res, {  });
+
+//   } catch (error) {
+//     const err = error.errors[0];
+//     return errorResponse(req, res, err.message);
+//   }
+// }
