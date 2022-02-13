@@ -70,8 +70,11 @@ export const create = async (req, res) => {
             age,
             phone,
             city,
-            state
+            state,
+            company_id: role == 'company' ? req.body.company : null
         };
+        console.log("🚀 ~ file: user.controller.js ~ line 75 ~ create ~ role", role)
+        console.log("🚀 ~ file: user.controller.js ~ line 75 ~ create ~ req.body.company_id", req.body.company)
         const newUser = await User.create(payload);
 
         console.log("role", role);

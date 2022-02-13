@@ -8,7 +8,7 @@ export const createUser = {
         password: Joi.string().required(),
         age: Joi.number().required(),
         gender: Joi.string().required(),
-        role: Joi.string().required().valid('user', 'admin', 'caretaker', 'doctor'),
+        role: Joi.string().required().valid('user', 'admin', 'caretaker', 'doctor', 'company'),
         city: Joi.string().required(),
         state: Joi.string().required(),
         reference_code: Joi.string().when("role", {
