@@ -23,7 +23,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {});
   Device.associate = function (models) {
-    // associations can be defined here
+    Device.hasOne(models.DeviceUserMapping, {
+      foreignKey: 'device_id',
+      as: 'device_mapping'
+    });
   };
   return Device;
 };

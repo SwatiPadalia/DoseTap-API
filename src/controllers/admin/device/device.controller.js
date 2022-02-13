@@ -135,6 +135,7 @@ export const all = async (req, res) => {
             where: {
                 [Op.and]: [statusFilter === null ? undefined : { status: statusFilter }, searchFilter === null ? undefined : { searchFilter }]
             },
+            include: [{ model: DeviceUserMapping, as: 'device_mapping' }],
             order: [['createdAt', 'DESC'], ['id', 'ASC']],
             offset: (page - 1) * limit,
             limit,
@@ -174,6 +175,8 @@ export const deviceTagToCompany = async (req, res) => {
         }
 
         const addDeviceUserMapping = await DeviceUserMapping.create(payload)
+
+        const markSold = await Device.update({ isSold: 1 }, { where: { id: device_id } });
         return successResponse(req, res, { addDeviceUserMapping });
     } catch (error) {
         return errorResponse(req, res, error.message);
