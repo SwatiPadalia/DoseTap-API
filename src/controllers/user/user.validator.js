@@ -30,3 +30,11 @@ export const update = {
       }),
   },
 };
+
+export const sync = {
+  body: {
+    appVersion: Joi.string().required(),
+    firmwareVersion: Joi.string().required(),
+    serialNumber: Joi.string().required()
+  },
+};

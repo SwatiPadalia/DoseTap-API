@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { errorResponse, successResponse } from '../../helpers';
-import { User } from '../../models';
+import { Device, DeviceCompanyMappings, DeviceUserMapping, User, UserDoctorMappings } from '../../models';
 const { Op } = require('sequelize')
 
 export const profile = async (req, res) => {
@@ -92,63 +92,91 @@ export const update = async (req, res) => {
 };
 
 
-// export const syncData = async (req, res) => {
-//   try {
-//     const { userId } = req.user;
-//     const lastSync = new Date().toISOString().slice(0, 19).replace('T', ' ');
-//     const {
-//       appVersion,
-//       firmwareVersion,
-//       serialNumber,
-//     } = req.body;
+export const syncData = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const lastSync = new Date();
+    const {
+      appVersion,
+      firmwareVersion,
+      serialNumber,
+    } = req.body;
 
-//     const user = await User.findOne({ where: { id: userId } });
-//     if (!user)
-//       throw new Error('User do not exist');
+    const user = await User.findOne({ where: { id: userId } });
+    if (!user)
+      throw new Error('User do not exist');
 
-//     const updatedUser = await User.update({ appVersion, lastSync }, { where: { id: userId } });
-    
-//     const device = await Device.findOne({
-//       where: {
-//         serialNumber
-//       }
-//     })
-//     if (!device)
-//       throw new Error('Device do not exist');
+    await User.update({ appVersion, lastSync }, { where: { id: userId } });
 
-    
-//     const deviceMapping = await DeviceUserMapping.findOne({
-//       where: {
-//         device_id: device.id,
-//       }
-//     })
+    const device = await Device.findOne({
+      where: {
+        serialNumber
+      }
+    })
+    if (!device)
+      throw new Error('Device do not exist');
 
-//     if (!deviceMapping)
-//       throw new Error('Device is not Mapped do not exist');
-    
-     
-//     if (deviceMapping.patient_id == userId){
-//       const updateDeviceMapping = await DeviceUserMapping.update({ lastSync}, { where: { device_id: device.id } });
-//     }
-//     else
-//     {
-//       const userDoctorMapping = await UserDoctorMapping.findOne({
-//         where:{
-//           patient_id: userId
-//         }
-//       })
+    await Device.update({ firmwareVersion }, { where: { id: device.id } });
 
-//       const newDeviceMapping = await DeviceUserMapping.create({
-//         device_id: device.id,
-//         patient_id: userId,
-//         doctor_id: userDoctorMapping.doctor_id
-//       });
-//     }
+    const deviceCompanyMapping = await DeviceCompanyMappings.findOne({
+      where: {
+        device_id: device.id,
+      }
+    })
 
-//     return successResponse(req, res, {  });
+    if (!deviceCompanyMapping)
+      throw new Error('Device is not Mapped do not exist');
 
-//   } catch (error) {
-//     const err = error.errors[0];
-//     return errorResponse(req, res, err.message);
-//   }
-// }
+    const deviceMapping = await DeviceUserMapping.findAll({
+      where: {
+        device_id: device.id,
+        company_id: deviceCompanyMapping.company_id
+      }
+    })
+
+    if (deviceMapping.length > 0) {
+      let matched = false;
+      deviceMapping.map(d => {
+        if (d.patient_id == userId) matched = true;
+      })
+
+      if (matched) {
+        await DeviceUserMapping.update({ lastSync }, { where: { device_id: device.id, patient_id: userId } });
+      } else {
+        var userDoctorMapping = await UserDoctorMappings.findOne({
+          where: {
+            patient_id: userId
+          }
+        })
+        await DeviceUserMapping.create({
+          device_id: device.id,
+          company_id: deviceCompanyMapping.company_id,
+          patient_id: userId,
+          doctor_id: userDoctorMapping.doctor_id,
+          lastSync
+        });
+      }
+    }
+    else {
+      var userDoctorMapping = await UserDoctorMappings.findOne({
+        where: {
+          patient_id: userId
+        }
+      })
+
+      await DeviceUserMapping.create({
+        device_id: device.id,
+        patient_id: userId,
+        doctor_id: userDoctorMapping.doctor_id,
+        company_id: deviceCompanyMapping.company_id,
+        lastSync
+      });
+    }
+
+    return successResponse(req, res, {});
+
+  } catch (error) {
+    console.log("🚀 ~ file: user.controller.js ~ line 164 ~ syncData ~ error", error)
+    return errorResponse(req, res, error.message);
+  }
+}

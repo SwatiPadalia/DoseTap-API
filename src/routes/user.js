@@ -47,4 +47,6 @@ router.get('/feeds', feedController.all);
 router.post('/alarm', validate(alarmValidator.createOrUpdate), alarmController.createOrUpdate);
 router.get('/alarm', alarmController.get);
 
+router.post('/sync', validate(userValidator.sync), userController.syncData);
+
 module.exports = router;

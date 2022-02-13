@@ -1,5 +1,5 @@
 import { errorResponse, successResponse } from '../../../helpers';
-import { Company, Device, DeviceUserMapping, User } from '../../../models';
+import { Company, Device, DeviceCompanyMappings, DeviceUserMapping, User } from '../../../models';
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 
@@ -34,7 +34,7 @@ export const partialMapping = async (req, res) => {
         const page = req.query.page || 1;
         const limit = 10;
         const sortOrder = sort == -1 ? 'ASC' : 'DESC';
-        const deviceMappings = await DeviceUserMapping.findAndCountAll({
+        const deviceMappings = await DeviceCompanyMappings.findAndCountAll({
             include: [
                 {
                     model: Device, as: 'device',

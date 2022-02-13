@@ -1,5 +1,5 @@
 import { errorResponse, successResponse } from '../../../helpers';
-import { Device, DeviceUserMapping } from '../../../models';
+import { Device, DeviceCompanyMappings } from '../../../models';
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 
@@ -135,7 +135,7 @@ export const all = async (req, res) => {
             where: {
                 [Op.and]: [statusFilter === null ? undefined : { status: statusFilter }, searchFilter === null ? undefined : { searchFilter }]
             },
-            include: [{ model: DeviceUserMapping, as: 'device_mapping' }],
+            include: [{ model: DeviceCompanyMappings, as: 'device_mapping' }],
             order: [['createdAt', 'DESC'], ['id', 'ASC']],
             offset: (page - 1) * limit,
             limit,
@@ -164,20 +164,20 @@ export const deviceTagToCompany = async (req, res) => {
             company_id,
             device_id
         };
-        const checkDeviceUserMapping = await DeviceUserMapping.findOne({
+        const checkDeviceCompanyMapping = await DeviceCompanyMappings.findOne({
             where: {
                 company_id,
                 device_id
             },
         });
-        if (checkDeviceUserMapping) {
+        if (checkDeviceCompanyMapping) {
             throw new Error('Device is already mapped to given Doctor & Company');
         }
 
-        const addDeviceUserMapping = await DeviceUserMapping.create(payload)
+        const addDeviceCompanyMapping = await DeviceCompanyMappings.create(payload)
 
         const markSold = await Device.update({ isSold: 1 }, { where: { id: device_id } });
-        return successResponse(req, res, { addDeviceUserMapping });
+        return successResponse(req, res, { addDeviceCompanyMapping });
     } catch (error) {
         return errorResponse(req, res, error.message);
     }
