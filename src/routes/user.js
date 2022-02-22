@@ -49,4 +49,6 @@ router.get('/alarm', alarmController.get);
 
 router.post('/sync', validate(userValidator.sync), userController.syncData);
 
+
+router.get('/caretaker-schedule', doseController.getCareTakerSchedule)
 module.exports = router;

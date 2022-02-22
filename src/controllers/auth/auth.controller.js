@@ -151,13 +151,34 @@ export const login = async (req, res) => {
             process.env.SECRET,
         );
         delete user.dataValues.password;
-        const alarm = await UserAlarm.findOne({
+        let alarm = await UserAlarm.findOne({
             limit: 1, where: {
                 user_id: user.id
             },
             order: [['createdAt', 'DESC']]
         })
-        return successResponse(req, res, { user, token, alarm });
+
+        let patient = null
+        if (user.role == 'caretaker') {
+            patient = await UserCareTakerMappings.findAll({
+                where: {
+                    caretaker_id: user.id
+                },
+                include: [{
+                    model: User,
+                    as: 'patient'
+                }]
+            })
+
+            alarm = await UserAlarm.findOne({
+                limit: 1, where: {
+                    user_id: patient[0].patient_id
+                },
+                order: [['createdAt', 'DESC']]
+            })
+        }
+
+        return successResponse(req, res, { user, token, alarm, patient });
     } catch (error) {
         return errorResponse(req, res, error.message);
     }

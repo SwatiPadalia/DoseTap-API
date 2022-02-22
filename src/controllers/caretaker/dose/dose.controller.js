@@ -1,12 +1,20 @@
 import { errorResponse, successResponse } from '../../../helpers';
 const { Op } = require('sequelize');
-const { ScheduleDose, Medicine, User, CareTakerScheduleDose } = require('../../../models');
+const { CareTakerScheduleDose, Medicine, User, UserCareTakerMappings } = require('../../../models');
 
 
 export const scheduleDose = async (req, res) => {
   try {
-    const { userId: patient_id } = req.user;
-    console.log("🚀 ~ file: dose.controller.js ~ line 9 ~ scheduleDose ~ patient_id", patient_id)
+    const { userId } = req.user;
+    console.log("🚀 ~ file: dose.controller.js ~ line 9 ~ scheduleDose ~ userId", userId)
+    const user_caretaker = await UserCareTakerMappings.findOne({
+      where: {
+        caretaker_id: userId
+      }
+    })
+    const patient_id = user_caretaker.patient_id
+    console.log("🚀 ~ file: dose.controller.js ~ line 15 ~ scheduleDose ~ patient_id", patient_id)
+
     const {
       medicine_id,
       slot_ids,
@@ -21,7 +29,7 @@ export const scheduleDose = async (req, res) => {
       count_morning, count_afternoon, count_evening, count_night
     }
 
-    const doseCreated = await ScheduleDose.create(payload);
+    const doseCreated = await CareTakerScheduleDose.create(payload);
 
 
     return successResponse(req, res, {});
@@ -34,14 +42,20 @@ export const scheduleDose = async (req, res) => {
 
 export const updateScheduledDose = async (req, res) => {
   try {
-    const { userId: patient_id } = req.user;
+    const { userId } = req.user;
+    const user_caretaker = await UserCareTakerMappings.findOne({
+      where: {
+        caretaker_id: userId
+      }
+    })
+    const patient_id = user_caretaker.patient_id
     const id = req.params.id;
     const {
       slot_ids,
       days,
       count_morning, count_afternoon, count_evening, count_night } = req.body;
 
-    const dose = await ScheduleDose.findOne({ where: { [Op.and]: [{ patient_id }, { id }] } });
+    const dose = await CareTakerScheduleDose.findOne({ where: { [Op.and]: [{ patient_id }, { id }] } });
     if (!dose)
       throw new Error('Dose do not exist');
 
@@ -51,7 +65,7 @@ export const updateScheduledDose = async (req, res) => {
       count_morning, count_afternoon, count_evening, count_night
     }
 
-    const updatedDose = await ScheduleDose.update(payload, { where: { id, patient_id } });
+    const updatedDose = await CareTakerScheduleDose.update(payload, { where: { id, patient_id } });
     return successResponse(req, res, {});
   } catch (error) {
     console.log(error);
@@ -63,11 +77,11 @@ export const updateScheduledDose = async (req, res) => {
 export const deleteScheduledDose = async (req, res) => {
   try {
     const id = req.params.id;
-    const dose = await ScheduleDose.findOne({ where: { id } });
+    const dose = await CareTakerScheduleDose.findOne({ where: { id } });
     if (!dose)
       throw new Error('Dose do not exist');
 
-    const deletedDose = await ScheduleDose.destroy({
+    const deletedDose = await CareTakerScheduleDose.destroy({
       where: {
         id
       }
@@ -82,24 +96,14 @@ export const deleteScheduledDose = async (req, res) => {
 export const all = async (req, res) => {
 
   try {
-    const { userId: patient_id } = req.user;
-    const doses = await ScheduleDose.findAll({
+    const { userId } = req.user;
+    const user_caretaker = await UserCareTakerMappings.findOne({
       where: {
-        patient_id
-      },
-      include: [{ model: Medicine, as: 'medicineDetails' }, { model: User, as: 'patientDetails' }]
-    });
-    return successResponse(req, res, { doses });
-  } catch (error) {
-    console.log(error);
-    return errorResponse(req, res, error.message);
-  }
-}
-
-export const getCareTakerSchedule = async (req, res) => {
-
-  try {
-    const { userId: patient_id } = req.user;
+        caretaker_id: userId
+      }
+    })
+    const patient_id = user_caretaker.patient_id
+    console.log("🚀 ~ file: dose.controller.js ~ line 105 ~ all ~ patient_id", patient_id)
     const doses = await CareTakerScheduleDose.findAll({
       where: {
         patient_id
