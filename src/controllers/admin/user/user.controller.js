@@ -9,7 +9,7 @@ export const create = async (req, res) => {
     try {
         let patient, doctor;
         const {
-            firstName, lastName, age, gender, email, password, phone, city, role = "patient", reference_code, state
+            firstName, lastName, dob, gender, email, password, phone, city, role = "patient", reference_code, state
         } = req.body;
 
         const user = await User.scope('withSecretColumns').findOne({
@@ -60,14 +60,14 @@ export const create = async (req, res) => {
             email,
             firstName,
             lastName,
-            age,
+            dob,
             password: reqPass,
             isVerified: false,
             verifyToken: uniqueId(),
             role,
             reference_code: (role == "user" || role == "doctor") ? uniqueCode('lowercase', 4, 4, randomstring.generate(10)) : null,
             gender,
-            age,
+            dob,
             phone,
             city,
             state,
@@ -97,7 +97,7 @@ export const create = async (req, res) => {
 
         return successResponse(req, res, { newUser });
     } catch (error) {
-        return errorResponse(req, res, error.message);
+        return errorResponse(req, res, error.messdob);
     }
 }
 
@@ -105,7 +105,7 @@ export const update = async (req, res) => {
     try {
         const id = req.params.id;
         const {
-            firstName, lastName, age, gender, email, password, phone, city, role, state
+            firstName, lastName, dob, gender, email, password, phone, city, role, state
         } = req.body;
 
         const user = await User.scope('withSecretColumns').findOne({
@@ -131,7 +131,7 @@ export const update = async (req, res) => {
                 password: reqPass,
                 role,
                 gender,
-                age,
+                dob,
                 phone,
                 city,
                 state
@@ -143,7 +143,7 @@ export const update = async (req, res) => {
                 lastName,
                 role,
                 gender,
-                age,
+                dob,
                 phone,
                 city,
                 state
@@ -154,7 +154,7 @@ export const update = async (req, res) => {
         return successResponse(req, res, {});
     } catch (error) {
         console.log(error)
-        return errorResponse(req, res, error.message);
+        return errorResponse(req, res, error.messdob);
     }
 }
 
@@ -182,7 +182,7 @@ export const statusUpdate = async (req, res) => {
         return successResponse(req, res, { user });
     } catch (error) {
         console.log(error)
-        return errorResponse(req, res, error.message);
+        return errorResponse(req, res, error.messdob);
     }
 }
 
@@ -199,7 +199,7 @@ export const findById = async (req, res) => {
         }
         return successResponse(req, res, { user });
     } catch (error) {
-        return errorResponse(req, res, error.message);
+        return errorResponse(req, res, error.messdob);
     }
 };
 
@@ -254,7 +254,7 @@ export const all = async (req, res) => {
             }
         }
 
-        const page = req.query.page || 1;
+        const pdob = req.query.pdob || 1;
         const limit = 10;
         const sortOrder = sort == -1 ? 'ASC' : 'DESC';
         const users = await User.findAndCountAll({
@@ -263,19 +263,19 @@ export const all = async (req, res) => {
             },
             include: [{ model: Company, as: 'company' }],
             order: [['id', sortOrder]],
-            offset: (page - 1) * limit,
+            offset: (pdob - 1) * limit,
             limit,
         });
         return successResponse(req, res, {
             users: {
                 ...users,
-                currentPage: parseInt(page),
-                totalPage: Math.ceil(users.count / limit)
+                currentPdob: parseInt(pdob),
+                totalPdob: Math.ceil(users.count / limit)
             }
         });
     } catch (error) {
         console.log("🚀 ~ file: user.controller.js ~ line 221 ~ all ~ error", error)
-        return errorResponse(req, res, error.message);
+        return errorResponse(req, res, error.messdob);
     }
 };
 
@@ -315,7 +315,7 @@ export const caretakerMapping = async (req, res) => {
         }
 
 
-        const page = req.query.page || 1;
+        const pdob = req.query.pdob || 1;
         const limit = 10;
         const sortOrder = sort == -1 ? 'ASC' : 'DESC';
         const user_caretaker = await UserCareTakerMappings.findAndCountAll({
@@ -324,19 +324,19 @@ export const caretakerMapping = async (req, res) => {
             },
             include: [{ model: User, as: 'patient' }, { model: User, as: 'caretaker' }],
             order: [['id', sortOrder]],
-            offset: (page - 1) * limit,
+            offset: (pdob - 1) * limit,
             limit,
         });
         return successResponse(req, res, {
             users: {
                 ...user_caretaker,
-                currentPage: parseInt(page),
-                totalPage: Math.ceil(user_caretaker.count / limit)
+                currentPdob: parseInt(pdob),
+                totalPdob: Math.ceil(user_caretaker.count / limit)
             }
         });
     } catch (error) {
         console.log("🚀 ~ file: user.controller.js ~ line 307 ~ caretakerMapping ~ error", error)
 
-        return errorResponse(req, res, error.message);
+        return errorResponse(req, res, error.messdob);
     }
 }

@@ -17,7 +17,7 @@ export const update = {
   body: {
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
-    age: Joi.number().required(),
+    dob: Joi.date().iso().required(),
     gender: Joi.string().required(),
     city: Joi.string().required(),
     phone: Joi.string().max(10).required()

@@ -12,7 +12,7 @@ module.exports = {
         role: "admin",
         city: "Delhi",
         gender: "male",
-        age: 23,
+        dob: '2022-01-17',
         state: "West Bengal",
         phone: '8722682249',
         createdAt: new Date(),

@@ -10,7 +10,7 @@ export const register = async (req, res) => {
     try {
         let patient, doctor;
         const {
-            firstName, lastName, age, gender, email, password, phone, city, role, reference_code, state
+            firstName, lastName, dob, gender, email, password, phone, city, role, reference_code, state
         } = req.body;
         if (process.env.IS_GOOGLE_AUTH_ENABLE === 'true') {
             if (!req.body.code) {
@@ -83,7 +83,7 @@ export const register = async (req, res) => {
             email,
             firstName,
             lastName,
-            age,
+            dob,
             password: reqPass,
             isVerified: false,
             verifyToken: uniqueId(),
@@ -118,7 +118,7 @@ export const register = async (req, res) => {
         return successResponse(req, res, { newUser });
     } catch (error) {
         console.log(error)
-        return errorResponse(req, res, error.message);
+        return errorResponse(req, res, error.messdob);
     }
 };
 
@@ -180,6 +180,6 @@ export const login = async (req, res) => {
 
         return successResponse(req, res, { user, token, alarm, patient });
     } catch (error) {
-        return errorResponse(req, res, error.message);
+        return errorResponse(req, res, error.messdob);
     }
 };

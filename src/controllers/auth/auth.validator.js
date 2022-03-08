@@ -6,7 +6,7 @@ export const register = {
         lastName: Joi.string().required(),
         email: Joi.string().allow('').optional().email(),
         password: Joi.string().required(),
-        age: Joi.number().required(),
+        dob: Joi.date().iso().required(),
         gender: Joi.string().required(),
         city: Joi.string().required(),
         state: Joi.string().required(),
