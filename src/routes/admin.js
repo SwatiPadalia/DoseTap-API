@@ -1,5 +1,6 @@
 import express from 'express';
 import validate from 'express-validation';
+import * as adherenceController from '../controllers/admin/adherence/adherence.controller';
 import * as companyController from '../controllers/admin/company/company.controller';
 import * as companyValidator from '../controllers/admin/company/company.validator';
 import * as dashboardController from '../controllers/admin/dashboard/dashboard.controller';
@@ -80,5 +81,6 @@ router.post("/medicine-upload", uploadMiddleware.single("file"), medicineControl
 
 //Dashboard
 router.get('/dashboard', dashboardController.all);
+router.get('/adherence', adherenceController.adherenceData)
 
 module.exports = router;
