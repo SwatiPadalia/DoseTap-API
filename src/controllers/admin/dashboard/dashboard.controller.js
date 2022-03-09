@@ -77,8 +77,8 @@ export const all = async (req, res) => {
         const adherence_missed_count = adherence_missed.count
 
         const total = adherence_open_count + adherence_missed_count;
-        data.avg_adherence_open = (adherence_open_count / total) ? (adherence_open_count / total) : 0;
-        data.avg_adherence_missed = (adherence_missed_count / total) ? (adherence_missed_count / total) : 0;
+        data.avg_adherence_open = (adherence_open_count / total) ? (adherence_open_count / total) * 100 : 0;
+        data.avg_adherence_missed = (adherence_missed_count / total) ? (adherence_missed_count / total) * 100 : 0;
 
         const active_users = await DeviceUserMapping.findAndCountAll({
             where: {
@@ -95,7 +95,7 @@ export const all = async (req, res) => {
         let yData = []
         let today = new Date();
         for (let i = 0; i < 7; i++) {
-            let x = moment().subtract(i, 'days').format("DD-MM-YYYY")
+            let x = moment().subtract(i, 'days').format("YYYY-MM-DD")
             xLabels.push(x)
             let adherence_open = await Adherence.findAndCountAll({
                 where: {
@@ -114,7 +114,7 @@ export const all = async (req, res) => {
             let total = (adherence_open.count + adherence_missed.count);
 
             let y = adherence_open.count / total;
-            yData.push(y ? y : 0)
+            yData.push(y ? y * 100 : 0)
 
         }
 

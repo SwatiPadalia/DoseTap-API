@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { errorResponse, successResponse, uniqueCode, uniqueId } from '../../../helpers';
-import { Company, User, UserCareTakerMappings, UserDoctorMappings } from '../../../models';
+import { Adherence, Company, User, UserCareTakerMappings, UserDoctorMappings } from '../../../models';
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 const randomstring = require("randomstring");
@@ -97,7 +97,7 @@ export const create = async (req, res) => {
 
         return successResponse(req, res, { newUser });
     } catch (error) {
-        return errorResponse(req, res, error.messdob);
+        return errorResponse(req, res, error.message);
     }
 }
 
@@ -154,7 +154,7 @@ export const update = async (req, res) => {
         return successResponse(req, res, {});
     } catch (error) {
         console.log(error)
-        return errorResponse(req, res, error.messdob);
+        return errorResponse(req, res, error.message);
     }
 }
 
@@ -182,7 +182,7 @@ export const statusUpdate = async (req, res) => {
         return successResponse(req, res, { user });
     } catch (error) {
         console.log(error)
-        return errorResponse(req, res, error.messdob);
+        return errorResponse(req, res, error.message);
     }
 }
 
@@ -199,7 +199,7 @@ export const findById = async (req, res) => {
         }
         return successResponse(req, res, { user });
     } catch (error) {
-        return errorResponse(req, res, error.messdob);
+        return errorResponse(req, res, error.message);
     }
 };
 
@@ -254,7 +254,7 @@ export const all = async (req, res) => {
             }
         }
 
-        const pdob = req.query.pdob || 1;
+        const page = req.query.page || 1;
         const limit = 10;
         const sortOrder = sort == -1 ? 'ASC' : 'DESC';
         const users = await User.findAndCountAll({
@@ -263,19 +263,44 @@ export const all = async (req, res) => {
             },
             include: [{ model: Company, as: 'company' }],
             order: [['id', sortOrder]],
-            offset: (pdob - 1) * limit,
+            offset: (page - 1) * limit,
             limit,
         });
+
+        if (role == "user") {
+            let rows = await Promise.all(users.rows.flatMap(async u => {
+                let adherence_open = await Adherence.findAndCountAll({
+                    where: {
+                        status: 'open',
+                        patient_id: u.id
+                    }
+                })
+
+                let adherence_missed = await Adherence.findAndCountAll({
+                    where: {
+                        status: 'missed',
+                        patient_id: u.id
+                    }
+                })
+                let total = (adherence_open.count + adherence_missed.count);
+
+                let y = adherence_open.count / total;
+                let adherence = y ? y * 100 : 0
+                return { ...u.get({ plain: true }), adherence }
+            }))
+            users.rows = rows;
+        }
+
         return successResponse(req, res, {
             users: {
                 ...users,
-                currentPdob: parseInt(pdob),
-                totalPdob: Math.ceil(users.count / limit)
+                currentPage: parseInt(page),
+                totalPage: Math.ceil(users.count / limit)
             }
         });
     } catch (error) {
         console.log("🚀 ~ file: user.controller.js ~ line 221 ~ all ~ error", error)
-        return errorResponse(req, res, error.messdob);
+        return errorResponse(req, res, error.message);
     }
 };
 
@@ -315,7 +340,7 @@ export const caretakerMapping = async (req, res) => {
         }
 
 
-        const pdob = req.query.pdob || 1;
+        const page = req.query.page || 1;
         const limit = 10;
         const sortOrder = sort == -1 ? 'ASC' : 'DESC';
         const user_caretaker = await UserCareTakerMappings.findAndCountAll({
@@ -324,19 +349,19 @@ export const caretakerMapping = async (req, res) => {
             },
             include: [{ model: User, as: 'patient' }, { model: User, as: 'caretaker' }],
             order: [['id', sortOrder]],
-            offset: (pdob - 1) * limit,
+            offset: (page - 1) * limit,
             limit,
         });
         return successResponse(req, res, {
             users: {
                 ...user_caretaker,
-                currentPdob: parseInt(pdob),
-                totalPdob: Math.ceil(user_caretaker.count / limit)
+                currentPage: parseInt(page),
+                totalPage: Math.ceil(user_caretaker.count / limit)
             }
         });
     } catch (error) {
         console.log("🚀 ~ file: user.controller.js ~ line 307 ~ caretakerMapping ~ error", error)
 
-        return errorResponse(req, res, error.messdob);
+        return errorResponse(req, res, error.message);
     }
 }
