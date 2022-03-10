@@ -82,5 +82,6 @@ router.post("/medicine-upload", uploadMiddleware.single("file"), medicineControl
 //Dashboard
 router.get('/dashboard', dashboardController.all);
 router.get('/adherence', adherenceController.adherenceData)
+router.get('/medicine-adherence', adherenceController.medicineAdherenceData)
 
 module.exports = router;

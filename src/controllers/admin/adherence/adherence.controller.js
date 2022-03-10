@@ -1,5 +1,5 @@
 import { errorResponse, getAge, successResponse } from '../../../helpers';
-import { Adherence, User } from '../../../models';
+import { Adherence, Medicine, ScheduleDose, User } from '../../../models';
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 
@@ -43,17 +43,17 @@ export const adherenceData = async (req, res) => {
             users = users.filter(u => {
                 let dob = getAge(u.dob);
                 console.log("🚀 ~ file: adherence.controller.js ~ line 45 ~ adherenceData ~ dob", dob)
-                
-                if(age == 1 ) return (dob >= 70)
-                
-                if(age == 2) return (dob >= 60 && dob < 70)
 
-                if(age == 3) return (dob >= 50 && dob < 60)
+                if (age == 1) return (dob >= 70)
 
-                if(age == 4) return (dob >= 40 && dob < 50)
-                
-                if(age == 5) return (dob < 40)
-                
+                if (age == 2) return (dob >= 60 && dob < 70)
+
+                if (age == 3) return (dob >= 50 && dob < 60)
+
+                if (age == 4) return (dob >= 40 && dob < 50)
+
+                if (age == 5) return (dob < 40)
+
                 return true
             })
         }
@@ -100,6 +100,74 @@ export const adherenceData = async (req, res) => {
             bucket_30
         });
 
+    } catch (error) {
+        return errorResponse(req, res, error.message);
+    }
+};
+
+export const medicineAdherenceData = async (req, res) => {
+    try {
+        let searchFilter = null;
+
+        const sort = req.query.sort || -1;
+
+        if (req.query.search) {
+            const search = req.query.search;
+
+            searchFilter = {
+                [Op.or]: [
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('name')), { [Op.like]: `%${search}%` }
+                    )
+                ]
+            }
+        }
+
+        const page = req.query.page || 1;
+        const limit = 10;
+        const sortOrder = sort == -1 ? 'ASC' : 'DESC';
+        const medicines = await Medicine.findAndCountAll({
+            where: {
+                [Op.and]: [searchFilter === null ? undefined : { searchFilter }]
+            },
+            order: [['createdAt', 'DESC'], ['id', 'ASC']],
+            offset: (page - 1) * limit,
+            limit,
+        });
+
+
+        const medicineResult = {
+            count: 0,
+            rows: []
+        }
+
+        medicineResult.count = medicines.count;
+
+        for (const m of medicines.rows) {
+            const count = await ScheduleDose.findAndCountAll({
+                where: {
+                    medicine_id: m.id
+                },
+                distinct: true,
+                col: 'patient_id'
+            })
+            let medicine = {
+                id: m.id,
+                name: m.name,
+                count: count.count
+            }
+
+            medicineResult.rows.push(medicine);
+
+        }
+        return successResponse(req, res, {
+            medicines:
+            {
+                ...medicineResult,
+                currentPage: parseInt(page),
+                totalPage: Math.ceil(medicines.count / limit)
+            }
+        });
     } catch (error) {
         return errorResponse(req, res, error.message);
     }
