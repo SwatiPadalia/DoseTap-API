@@ -118,7 +118,7 @@ export const register = async (req, res) => {
         return successResponse(req, res, { newUser });
     } catch (error) {
         console.log(error)
-        return errorResponse(req, res, error.messdob);
+        return errorResponse(req, res, error.message);
     }
 };
 
@@ -180,6 +180,6 @@ export const login = async (req, res) => {
 
         return successResponse(req, res, { user, token, alarm, patient });
     } catch (error) {
-        return errorResponse(req, res, error.messdob);
+        return errorResponse(req, res, error.message);
     }
 };
