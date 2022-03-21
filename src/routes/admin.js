@@ -84,4 +84,10 @@ router.get('/dashboard', dashboardController.all);
 router.get('/adherence', adherenceController.adherenceData)
 router.get('/medicine-adherence', adherenceController.medicineAdherenceData)
 
+
+
+// Doctor
+
+router.get('/doctor/:id/patients', userController.patientUnderDoctor)
+
 module.exports = router;

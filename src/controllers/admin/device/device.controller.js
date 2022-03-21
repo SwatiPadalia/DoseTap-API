@@ -1,5 +1,5 @@
 import { errorResponse, successResponse } from '../../../helpers';
-import { Device, DeviceCompanyMappings } from '../../../models';
+import { Device, DeviceCompanyMappings, Company } from '../../../models';
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 
@@ -135,7 +135,11 @@ export const all = async (req, res) => {
             where: {
                 [Op.and]: [statusFilter === null ? undefined : { status: statusFilter }, searchFilter === null ? undefined : { searchFilter }]
             },
-            include: [{ model: DeviceCompanyMappings, as: 'device_mapping' }],
+            include: [{
+                model: DeviceCompanyMappings, as: 'device_mapping', include: [{
+                    model: Company, as: 'company'
+                }]
+            }],
             order: [['createdAt', 'DESC'], ['id', 'ASC']],
             offset: (page - 1) * limit,
             limit,

@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { errorResponse, successResponse, uniqueCode, uniqueId } from '../../../helpers';
-import { Adherence, Company, User, UserCareTakerMappings, UserDoctorMappings } from '../../../models';
+import { Adherence, Company, DeviceUserMapping, User, UserCareTakerMappings, UserDoctorMappings } from '../../../models';
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 const randomstring = require("randomstring");
@@ -348,6 +348,72 @@ export const caretakerMapping = async (req, res) => {
                 [Op.and]: [searchFilter === null ? undefined : { searchFilter }]
             },
             include: [{ model: User, as: 'patient' }, { model: User, as: 'caretaker' }],
+            order: [['id', sortOrder]],
+            offset: (page - 1) * limit,
+            limit,
+        });
+        return successResponse(req, res, {
+            users: {
+                ...user_caretaker,
+                currentPage: parseInt(page),
+                totalPage: Math.ceil(user_caretaker.count / limit)
+            }
+        });
+    } catch (error) {
+        console.log("🚀 ~ file: user.controller.js ~ line 307 ~ caretakerMapping ~ error", error)
+
+        return errorResponse(req, res, error.message);
+    }
+}
+
+export const patientUnderDoctor = async (req, res) => {
+
+    try {
+
+        const doctor_id = req.params.id;
+        console.log("🚀 ~ file: user.controller.js ~ line 374 ~ patientUnderDoctor ~ doctor_id", doctor_id)
+
+        let searchFilter = null;
+
+        const sort = req.query.sort || -1;
+
+        if (req.query.search) {
+            const search = req.query.search;
+
+            searchFilter = {
+                [Op.or]: [
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('patient.firstName')), { [Op.like]: `%${search}%` }
+                    ),
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('patient.email')), { [Op.like]: `%${search}%` }
+                    ),
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('patient.phone')), { [Op.like]: `%${search}%` }
+                    )
+                ]
+            }
+        }
+
+        if (req.query.status) {
+            const status = req.query.status;
+            if (status == 1) {
+                statusFilter = true
+            } else {
+                statusFilter = false
+            }
+        }
+
+
+        const page = req.query.page || 1;
+        const limit = 10;
+        const sortOrder = sort == -1 ? 'ASC' : 'DESC';
+        const user_caretaker = await DeviceUserMapping.findAndCountAll({
+            where: {
+                [Op.and]: [searchFilter === null ? undefined : { searchFilter }],
+                doctor_id
+            },
+            include: [{ model: User, as: 'patient' }],
             order: [['id', sortOrder]],
             offset: (page - 1) * limit,
             limit,
