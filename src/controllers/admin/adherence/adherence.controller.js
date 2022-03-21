@@ -138,6 +138,9 @@ export const medicineAdherenceData = async (req, res) => {
                 [Op.or]: [
                     sequelize.where(
                         sequelize.fn('LOWER', sequelize.col('name')), { [Op.like]: `%${search}%` }
+                    ),
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('companyName')), { [Op.like]: `%${search}%` }
                     )
                 ]
             }
@@ -174,6 +177,7 @@ export const medicineAdherenceData = async (req, res) => {
             let medicine = {
                 id: m.id,
                 name: m.name,
+                companyName: m.companyName,
                 count: count.count
             }
 
