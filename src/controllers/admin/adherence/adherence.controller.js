@@ -1,5 +1,5 @@
 import { errorResponse, getAge, successResponse } from '../../../helpers';
-import { Adherence, Medicine, ScheduleDose, User } from '../../../models';
+import { Adherence, DeviceUserMapping, Medicine, ScheduleDose, User } from '../../../models';
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 
@@ -7,7 +7,7 @@ const sequelize = require('sequelize');
 
 export const adherenceData = async (req, res) => {
     try {
-        let dateToFilter = null, stateFilter = null, genderFilter = null, ageFilter = null;
+        let dateToFilter = null, stateFilter = null, genderFilter = null, ageFilter = null, companyFilter = null;
 
         let bucket_100_80 = 0;
         let bucket_80_50 = 0;
@@ -30,9 +30,29 @@ export const adherenceData = async (req, res) => {
             }
         }
 
+        if (req.query.company_id) {
+            const company_id = req.query.company_id
+            let user_ids_mapped_company = [
+                ... (await DeviceUserMapping.findAll({
+                    where: {
+                        company_id
+                    },
+                    attributes: ['patient_id'],
+                    raw: true
+                })),
+            ].map(user => user.patient_id);
+
+            companyFilter = {
+                id: {
+                    [Op.in]: user_ids_mapped_company
+                }
+            }
+        }
+
         let users = await User.findAll({
             where: {
-                [Op.and]: [stateFilter === null ? undefined : { state: stateFilter }, genderFilter === null ? undefined : { gender: genderFilter }, { role: "user" }]
+                [Op.and]: [stateFilter === null ? undefined : { state: stateFilter }, genderFilter === null ? undefined : { gender: genderFilter }, { role: "user" },
+                companyFilter === null ? undefined : { ...companyFilter }]
             },
             attributes: ["id", "dob"]
         });

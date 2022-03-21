@@ -88,6 +88,9 @@ export const all = async (req, res) => {
                 [Op.or]: [
                     sequelize.where(
                         sequelize.fn('LOWER', sequelize.col('name')), { [Op.like]: `%${search}%` }
+                    ),
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('companyName')), { [Op.like]: `%${search}%` }
                     )
                 ]
             }
