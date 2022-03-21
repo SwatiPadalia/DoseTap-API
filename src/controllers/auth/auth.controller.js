@@ -145,6 +145,7 @@ export const login = async (req, res) => {
                     email: user.email,
                     role: user.role,
                     phone: user.phone,
+                    company_id: user.company_id === null ? undefined : user.company_id,
                     createdAt: new Date(),
                 },
             },

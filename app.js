@@ -7,6 +7,7 @@ import errorHandler from './src/middleware/errorHandler';
 import userMiddleware from './src/middleware/userAuth';
 import adminRoutes from './src/routes/admin';
 import caretakerRoutes from './src/routes/caretaker';
+import companyRoutes from './src/routes/company';
 import publicRoutes from './src/routes/public';
 import userRoutes from './src/routes/user';
 
@@ -27,6 +28,7 @@ app.use('/api', publicRoutes);
 app.use('/api/user', userMiddleware, userRoutes);
 app.use('/api/caretaker', userMiddleware, caretakerRoutes);
 app.use('/api/admin', userMiddleware, adminMiddleware, adminRoutes);
+app.use('/api/company', userMiddleware, companyRoutes);
 app.use(errorHandler);
 
 global.__basedir = __dirname;
