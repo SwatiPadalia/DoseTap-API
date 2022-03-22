@@ -373,7 +373,7 @@ export const patientUnderDoctor = async (req, res) => {
         const doctor_id = req.params.id;
         console.log("🚀 ~ file: user.controller.js ~ line 374 ~ patientUnderDoctor ~ doctor_id", doctor_id)
 
-        let searchFilter = null;
+        let searchFilter = null, statusFilter = null, stateFilter = null;
 
         const sort = req.query.sort || -1;
 
@@ -398,9 +398,22 @@ export const patientUnderDoctor = async (req, res) => {
         if (req.query.status) {
             const status = req.query.status;
             if (status == 1) {
-                statusFilter = true
+                statusFilter = sequelize.where(
+                    sequelize.fn('LOWER', sequelize.col('patient.status')), { [Op.eq]: true })
             } else {
-                statusFilter = false
+                statusFilter = sequelize.where(
+                    sequelize.fn('LOWER', sequelize.col('patient.status')), { [Op.eq]: false })
+            }
+        }
+
+        if (req.query.state) {
+            const state = req.query.state;
+            stateFilter = {
+                [Op.or]: [
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('patient.state')), { [Op.like]: `%${state}%` }
+                    )
+                ]
             }
         }
 
@@ -410,7 +423,7 @@ export const patientUnderDoctor = async (req, res) => {
         const sortOrder = sort == -1 ? 'ASC' : 'DESC';
         const user_caretaker = await DeviceUserMapping.findAndCountAll({
             where: {
-                [Op.and]: [searchFilter === null ? undefined : { searchFilter }],
+                [Op.and]: [searchFilter === null ? undefined : { searchFilter }, statusFilter === null ? undefined : { statusFilter }, stateFilter === null ? undefined : { stateFilter }],
                 doctor_id
             },
             include: [{ model: User, as: 'patient' }],
@@ -418,6 +431,36 @@ export const patientUnderDoctor = async (req, res) => {
             offset: (page - 1) * limit,
             limit,
         });
+
+
+        let rows = await Promise.all(user_caretaker.rows.flatMap(async u => {
+            let adherence_open = await Adherence.findAndCountAll({
+                where: {
+                    status: 'open',
+                    patient_id: u.patient_id
+                }
+            })
+
+            let adherence_missed = await Adherence.findAndCountAll({
+                where: {
+                    status: 'missed',
+                    patient_id: u.patient_id
+                }
+            })
+            let total = (adherence_open.count + adherence_missed.count);
+
+            let y = adherence_open.count / total;
+            let adherence = y ? y * 100 : 0
+            return {
+                ...u.get({ plain: true }),
+                "patient": {
+                    ...u.patient.get({ plain: true }),
+                    adherence
+                }
+            }
+        }))
+
+        user_caretaker.rows = rows
         return successResponse(req, res, {
             users: {
                 ...user_caretaker,
