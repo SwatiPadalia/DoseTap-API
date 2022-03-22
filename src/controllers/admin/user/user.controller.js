@@ -206,7 +206,7 @@ export const findById = async (req, res) => {
 export const all = async (req, res) => {
 
     try {
-        let searchFilter = null, statusFilter = null, stateFilter = null;
+        let searchFilter = null, statusFilter = null, stateFilter = null, companyFilter = null;
 
         const role = req.query.role;
 
@@ -254,12 +254,41 @@ export const all = async (req, res) => {
             }
         }
 
+        if (req.query.company_id) {
+            const company_id = req.query.company_id;
+
+            if (role == "doctor") {
+                let associated_doctor = [
+                    ... (await DeviceUserMapping.findAll({
+                        where: {
+                            company_id
+                        },
+                        attributes: ['doctor_id'],
+                        raw: true
+                    })),
+                ].map(doctor => doctor.doctor_id);
+
+                companyFilter = {
+                    id: {
+                        [Op.in]: associated_doctor
+                    }
+                }
+            }
+        }
+
+
         const page = req.query.page || 1;
         const limit = 10;
         const sortOrder = sort == -1 ? 'ASC' : 'DESC';
         const users = await User.findAndCountAll({
             where: {
-                [Op.and]: [{ role }, statusFilter === null ? undefined : { status: statusFilter }, searchFilter === null ? undefined : { searchFilter }, stateFilter === null ? undefined : { stateFilter }]
+                [Op.and]: [
+                    { role },
+                    statusFilter === null ? undefined : { status: statusFilter },
+                    searchFilter === null ? undefined : { searchFilter },
+                    stateFilter === null ? undefined : { stateFilter },
+                    companyFilter === null ? undefined : { ...companyFilter }
+                ]
             },
             include: [{ model: Company, as: 'company' }],
             order: [['id', sortOrder]],
@@ -287,6 +316,22 @@ export const all = async (req, res) => {
                 let y = adherence_open.count / total;
                 let adherence = y ? y * 100 : 0
                 return { ...u.get({ plain: true }), adherence }
+            }))
+            users.rows = rows;
+        }
+
+        if (role == "doctor") {
+
+            let rows = await Promise.all(users.rows.flatMap(async u => {
+
+                let company_associated = await DeviceUserMapping.findOne({
+                    where: {
+                        doctor_id: u.id,
+                    },
+                    include: [{ model: Company, as: 'company' }]
+                })
+
+                return { ...u.get({ plain: true }), company_associated: company_associated.company.name }
             }))
             users.rows = rows;
         }
