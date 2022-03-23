@@ -331,7 +331,7 @@ export const all = async (req, res) => {
                     include: [{ model: Company, as: 'company' }]
                 })
 
-                return { ...u.get({ plain: true }), company_associated: company_associated.company.name }
+                return { ...u.get({ plain: true }), company_associated: company_associated != null ? company_associated.company.name : undefined }
             }))
             users.rows = rows;
         }
