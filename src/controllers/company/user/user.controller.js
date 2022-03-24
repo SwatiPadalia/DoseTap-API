@@ -1,5 +1,5 @@
 import { errorResponse, successResponse } from '../../../helpers';
-import { Adherence, Company, DeviceUserMapping, User, UserCareTakerMappings } from '../../../models';
+import { Adherence, Company, DeviceUserMapping, User } from '../../../models';
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 const randomstring = require("randomstring");
@@ -11,6 +11,7 @@ export const all = async (req, res) => {
         let user_ids_mapped_company = [];
 
         const company_id = req.user.company_id;
+        console.log("🚀 ~ file: user.controller.js ~ line 14 ~ all ~ company_id", company_id)
 
         let searchFilter = null, statusFilter = null, stateFilter = null;
 
@@ -139,10 +140,12 @@ export const all = async (req, res) => {
 };
 
 
-export const caretakerMapping = async (req, res) => {
-
+export const allCompanyUser = async (req, res) => {
     try {
-        let searchFilter = null;
+
+        const id = req.user.company_id;
+
+        let searchFilter = null, statusFilter = null;
 
         const sort = req.query.sort || -1;
 
@@ -152,13 +155,13 @@ export const caretakerMapping = async (req, res) => {
             searchFilter = {
                 [Op.or]: [
                     sequelize.where(
-                        sequelize.fn('LOWER', sequelize.col('caretaker.firstName')), { [Op.like]: `%${search}%` }
+                        sequelize.fn('LOWER', sequelize.col('firstName')), { [Op.like]: `%${search}%` }
                     ),
                     sequelize.where(
-                        sequelize.fn('LOWER', sequelize.col('caretaker.email')), { [Op.like]: `%${search}%` }
+                        sequelize.fn('LOWER', sequelize.col('email')), { [Op.like]: `%${search}%` }
                     ),
                     sequelize.where(
-                        sequelize.fn('LOWER', sequelize.col('caretaker.phone')), { [Op.like]: `%${search}%` }
+                        sequelize.fn('LOWER', sequelize.col('phone')), { [Op.like]: `%${search}%` }
                     )
                 ]
             }
@@ -177,15 +180,122 @@ export const caretakerMapping = async (req, res) => {
         const page = req.query.page || 1;
         const limit = 10;
         const sortOrder = sort == -1 ? 'ASC' : 'DESC';
-        const user_caretaker = await UserCareTakerMappings.findAndCountAll({
+        const users = await User.findAndCountAll({
             where: {
-                [Op.and]: [searchFilter === null ? undefined : { searchFilter }]
+                [Op.and]: [{ company_id: id }, statusFilter === null ? undefined : { status: statusFilter }, searchFilter === null ? undefined : { searchFilter }]
             },
-            include: [{ model: User, as: 'patient' }, { model: User, as: 'caretaker' }],
             order: [['id', sortOrder]],
             offset: (page - 1) * limit,
             limit,
         });
+        return successResponse(req, res, {
+            users: {
+                ...users,
+                currentPage: parseInt(page),
+                totalPage: Math.ceil(users.count / limit)
+            }
+        });
+    } catch (error) {
+        return errorResponse(req, res, error.message);
+    }
+};
+
+
+export const patientUnderDoctor = async (req, res) => {
+
+    try {
+
+        const doctor_id = req.params.id;
+        console.log("🚀 ~ file: user.controller.js ~ line 374 ~ patientUnderDoctor ~ doctor_id", doctor_id)
+
+        let searchFilter = null, statusFilter = null, stateFilter = null;
+
+        const sort = req.query.sort || -1;
+
+        if (req.query.search) {
+            const search = req.query.search;
+
+            searchFilter = {
+                [Op.or]: [
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('patient.firstName')), { [Op.like]: `%${search}%` }
+                    ),
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('patient.email')), { [Op.like]: `%${search}%` }
+                    ),
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('patient.phone')), { [Op.like]: `%${search}%` }
+                    )
+                ]
+            }
+        }
+
+        if (req.query.status) {
+            const status = req.query.status;
+            if (status == 1) {
+                statusFilter = sequelize.where(
+                    sequelize.fn('LOWER', sequelize.col('patient.status')), { [Op.eq]: true })
+            } else {
+                statusFilter = sequelize.where(
+                    sequelize.fn('LOWER', sequelize.col('patient.status')), { [Op.eq]: false })
+            }
+        }
+
+        if (req.query.state) {
+            const state = req.query.state;
+            stateFilter = {
+                [Op.or]: [
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('patient.state')), { [Op.like]: `%${state}%` }
+                    )
+                ]
+            }
+        }
+
+
+        const page = req.query.page || 1;
+        const limit = 10;
+        const sortOrder = sort == -1 ? 'ASC' : 'DESC';
+        const user_caretaker = await DeviceUserMapping.findAndCountAll({
+            where: {
+                [Op.and]: [searchFilter === null ? undefined : { searchFilter }, statusFilter === null ? undefined : { statusFilter }, stateFilter === null ? undefined : { stateFilter }],
+                doctor_id
+            },
+            include: [{ model: User, as: 'patient' }],
+            order: [['id', sortOrder]],
+            offset: (page - 1) * limit,
+            limit,
+        });
+
+
+        let rows = await Promise.all(user_caretaker.rows.flatMap(async u => {
+            let adherence_open = await Adherence.findAndCountAll({
+                where: {
+                    status: 'open',
+                    patient_id: u.patient_id
+                }
+            })
+
+            let adherence_missed = await Adherence.findAndCountAll({
+                where: {
+                    status: 'missed',
+                    patient_id: u.patient_id
+                }
+            })
+            let total = (adherence_open.count + adherence_missed.count);
+
+            let y = adherence_open.count / total;
+            let adherence = y ? y * 100 : 0
+            return {
+                ...u.get({ plain: true }),
+                "patient": {
+                    ...u.patient.get({ plain: true }),
+                    adherence
+                }
+            }
+        }))
+
+        user_caretaker.rows = rows
         return successResponse(req, res, {
             users: {
                 ...user_caretaker,

@@ -100,7 +100,7 @@ export const adherenceData = async (req, res) => {
             })
 
             let total = adherence_open.count + adherence_missed.count
-            let avg = (adherence_open.count / total) * 100
+            let avg = (adherence_open.count / total) * 100 || 0
 
             if (avg <= 100 && avg >= 80) bucket_100_80++;
             if (avg < 80 && avg >= 50) bucket_80_50++;
