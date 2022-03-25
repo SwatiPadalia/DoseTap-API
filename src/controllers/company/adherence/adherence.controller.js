@@ -151,7 +151,7 @@ export const medicineAdherenceData = async (req, res) => {
             where: {
                 [Op.and]: [searchFilter === null ? undefined : { searchFilter }]
             },
-            order: [['createdAt', 'DESC'], ['id', 'ASC']],
+            order: [['name', 'ASC']],
             offset: (page - 1) * limit,
             limit,
         });

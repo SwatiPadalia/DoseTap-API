@@ -112,7 +112,7 @@ export const all = async (req, res) => {
             where: {
                 [Op.and]: [statusFilter === null ? undefined : { status: statusFilter }, searchFilter === null ? undefined : { searchFilter }]
             },
-            order: [['createdAt', 'DESC'], ['id', 'ASC']],
+            order: [['name', 'ASC']],
             offset: (page - 1) * limit,
             limit,
         });
@@ -178,6 +178,9 @@ export const csvBulkImport = async (req, res) => {
             .on("end", () => {
                 Medicine.bulkCreate(medicines)
                     .then(() => {
+                        fs.unlink(path, function () {
+                            // file deleted
+                        });
                         return successResponse(req, res, {});
                     })
                     .catch((error) => {
