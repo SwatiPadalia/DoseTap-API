@@ -7039,6 +7039,11 @@
   dependencies:
     "debug" "^2.2.0"
 
+"underscore@^1.13.2":
+  "integrity" "sha512-ekY1NhRzq0B08g4bGuX4wd2jZx5GnKz6mKSqFL4nqBlfyMGiG10gDFhDTMEfYmDL6Jy0FUIZp7wiRB+0BP7J2g=="
+  "resolved" "https://registry.npmjs.org/underscore/-/underscore-1.13.2.tgz"
+  "version" "1.13.2"
+
 "unicode-canonical-property-names-ecmascript@^1.0.4":
   "integrity" "sha512-jDrNnXWHd4oHiTZnx/ZG7gtUTVp+gCcTTKr8L0HjlwphROEW3+Him+IpvC+xcJEFegapiMZyZe02CyuOnRmbnQ=="
   "resolved" "https://registry.npmjs.org/unicode-canonical-property-names-ecmascript/-/unicode-canonical-property-names-ecmascript-1.0.4.tgz"

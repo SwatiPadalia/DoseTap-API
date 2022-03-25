@@ -1,3 +1,4 @@
+import _ from 'underscore';
 import { errorResponse, getAge, successResponse } from '../../../helpers';
 import { Adherence, DeviceUserMapping, Medicine, ScheduleDose, User } from '../../../models';
 const { Op } = require('sequelize');
@@ -125,6 +126,8 @@ export const adherenceData = async (req, res) => {
 
 export const medicineAdherenceData = async (req, res) => {
     try {
+        const company_id = req.user.company_id;
+
         let searchFilter = null;
 
         const sort = req.query.sort || -1;
@@ -161,18 +164,38 @@ export const medicineAdherenceData = async (req, res) => {
 
         medicineResult.count = medicines.count;
 
+        let user_ids_mapped_company = [
+            ... (await DeviceUserMapping.findAll({
+                where: {
+                    company_id
+                },
+                attributes: ['patient_id'],
+                raw: true
+            })),
+        ].map(user => user.patient_id);
+
+        console.log("🚀 ~ file: adherence.controller.js ~ line 176 ~ medicineAdherenceData ~ user_ids_mapped_company", user_ids_mapped_company)
+
         for (const m of medicines.rows) {
-            const count = await ScheduleDose.findAndCountAll({
+
+            const patient_ids = [... (await ScheduleDose.findAll({
                 where: {
                     medicine_id: m.id
                 },
                 distinct: true,
                 col: 'patient_id'
-            })
+            })),
+            ].map(user => user.patient_id);
+
+            console.log("🚀 ~ file: adherence.controller.js ~ line 187 ~ medicineAdherenceData ~ patients", patient_ids)
+
+            let commonPatients = _.intersection(patient_ids, user_ids_mapped_company);
+
+            console.log("🚀 ~ file: adherence.controller.js ~ line 192 ~ medicineAdherenceData ~ commonPatients", commonPatients)
             let medicine = {
                 id: m.id,
                 name: m.name,
-                count: count.count
+                count: commonPatients.length
             }
 
             medicineResult.rows.push(medicine);
