@@ -128,8 +128,12 @@ export const login = async (req, res) => {
         const user = await User.scope('withSecretColumns').findOne({
             where: { email },
         });
+        console.log("🚀 ~ file: auth.controller.js ~ line 131 ~ user ~ user", user)
         if (!user) {
             throw new Error('Incorrect Email Id/Password');
+        }
+        if (user.status == false) {
+            throw new Error('User is disabled please contact support!');
         }
         const reqPass = crypto
             .createHash('md5')
