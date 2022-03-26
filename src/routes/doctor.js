@@ -13,4 +13,8 @@ router.get('/adherence', adherenceController.adherenceData)
 router.get('/medicine-adherence', adherenceController.medicineAdherenceData)
 router.get('/users', userController.all)
 
+
+router.get('/caretaker-mapping', userController.caretakerMapping);
+
+
 module.exports = router;

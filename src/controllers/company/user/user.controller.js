@@ -137,7 +137,13 @@ export const all = async (req, res) => {
                     include: [{ model: Company, as: 'company' }]
                 })
 
-                return { ...u.get({ plain: true }), company_associated: company_associated != null ? company_associated.company.name : undefined }
+                let patients_count = [... (await DeviceUserMapping.findAll({
+                    where: {
+                        doctor_id: u.id,
+                    },
+                }))].length
+
+                return { ...u.get({ plain: true }), company_associated: company_associated != null ? company_associated.company.name : undefined, patients_count }
             }))
             users.rows = rows;
         }
