@@ -25,4 +25,10 @@ export const updateDoses = {
   }
 };
 
+export const acceptReject = {
+  body: {
+    status: Joi.number().valid(1, 0).required()
+  }
+}
+
 

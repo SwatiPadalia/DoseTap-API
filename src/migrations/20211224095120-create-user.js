@@ -68,6 +68,10 @@ module.exports = {
       type: Sequelize.STRING,
       defaultValue: null,
     },
+    resetToken: {
+      type: Sequelize.STRING,
+      defaultValue: null,
+    },
     isVerified: {
       type: Sequelize.BOOLEAN,
       defaultValue: true,

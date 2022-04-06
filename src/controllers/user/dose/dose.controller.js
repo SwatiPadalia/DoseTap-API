@@ -112,3 +112,27 @@ export const getCareTakerSchedule = async (req, res) => {
     return errorResponse(req, res, error.message);
   }
 }
+
+export const acceptRejectCareTakerSchedule = async (req, res) => {
+  try {
+    const { userId: patient_id } = req.user;
+    const { status } = req.body
+    if (status) {
+      //Mail that its accepted
+    } else {
+      //Mail that its rejected
+    }
+
+    await CareTakerScheduleDose.destroy({
+      where: {
+        patient_id
+      }
+    })
+
+    return successResponse(req, res, "success");
+
+  } catch (error) {
+    console.log(error);
+    return errorResponse(req, res, error.message);
+  }
+}

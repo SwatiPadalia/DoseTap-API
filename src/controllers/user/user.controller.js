@@ -50,7 +50,7 @@ export const changePassword = async (req, res) => {
     await User.update({ password: newPass }, { where: { id: user.id } });
     return successResponse(req, res, {});
   } catch (error) {
-    return errorResponse(req, res, error.messdob);
+    return errorResponse(req, res, error.message());
   }
 };
 

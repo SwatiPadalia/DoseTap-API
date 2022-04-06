@@ -117,6 +117,8 @@ export const update = async (req, res) => {
             throw new Error('User do not exist');
         }
 
+        console.log('dob', dob);
+
         let reqPass, payload;
         if (password) {
             console.log("sss")
@@ -151,6 +153,7 @@ export const update = async (req, res) => {
         }
 
         const updatedUser = await User.update(payload, { where: { id } });
+        console.log("🚀 ~ file: user.controller.js ~ line 156 ~ update ~ updatedUser", updatedUser)
         return successResponse(req, res, {});
     } catch (error) {
         console.log(error)

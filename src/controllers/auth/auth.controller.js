@@ -124,10 +124,20 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
     try {
-        const email = req.body.email
-        const user = await User.scope('withSecretColumns').findOne({
-            where: { email },
-        });
+        let user, email, phone;
+        if (req.body.email != undefined) {
+            email = req.body.email
+            user = await User.scope('withSecretColumns').findOne({
+                where: { email },
+            });
+
+        } else {
+            phone = req.body.phone
+            user = await User.scope('withSecretColumns').findOne({
+                where: { phone },
+            });
+        }
+
         console.log("🚀 ~ file: auth.controller.js ~ line 131 ~ user ~ user", user)
         if (!user) {
             throw new Error('Incorrect Email Id/Password');
@@ -186,5 +196,95 @@ export const login = async (req, res) => {
         return successResponse(req, res, { user, token, alarm, patient });
     } catch (error) {
         return errorResponse(req, res, error.message);
+    }
+};
+
+export const forgotPassword = async (req, res) => {
+
+    try {
+        const { email } = req.body
+        let verificationLink;
+
+        const isUser = await User.findOne({
+            where: {
+                email
+            }
+        })
+
+        if (!isUser) {
+            return errorResponse(req, res, "User not found with this email address!");
+        }
+
+        const env = process.env.NODE_ENV || 'development';
+
+        let randomToken = jwt.sign(
+            {
+                user: {
+                    email,
+                    createdAt: new Date(),
+                },
+            },
+            process.env.SECRET,
+        );
+
+        isUser.resetToken = randomToken;
+        isUser.save();
+
+        if (env == "development")
+            verificationLink = `http://localhost:3001/reset/${randomToken}`;
+        else if (env == "test")
+            verificationLink = `https://dev.dosetap.com/reset/${randomToken}`;
+        else
+            verificationLink = `https://portal.dosetap.com/reset/${randomToken}`;
+
+        //send email code
+        return successResponse(req, res, verificationLink);
+    } catch (error) {
+        return errorResponse(req, res, error.message);
+    }
+
+}
+
+export const resetTokenGet = async (req, res) => {
+
+    let token = req.params.token;
+
+    const isTokenValid = await User.findOne({
+        where: {
+            resetToken: token
+        }
+    })
+    console.log("🚀 ~ file: auth.controller.js ~ line 247 ~ resetTokenGet ~ isTokenValid", isTokenValid)
+
+    if (isTokenValid == null)
+        return errorResponse(req, res, "Invalid Token");
+    return successResponse(req, res, "Valid Token");
+
+}
+
+
+export const resetTokenPost = async (req, res) => {
+
+    try {
+        let token = req.params.token;
+        const user = await User.scope('withSecretColumns').findOne({
+            where: {
+                resetToken: token
+            }
+        })
+
+        if (user == null)
+            return errorResponse(req, res, "Invalid Token");
+
+
+        const newPass = crypto
+            .createHash('md5')
+            .update(req.body.password)
+            .digest('hex');
+
+        await User.update({ password: newPass }, { where: { id: user.id } });
+        return successResponse(req, res, {});
+    } catch (error) {
+        return errorResponse(req, res, error.message());
     }
 };

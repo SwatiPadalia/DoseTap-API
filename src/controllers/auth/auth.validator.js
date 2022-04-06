@@ -32,9 +32,24 @@ export const register = {
 export const login = {
     body: {
         email: Joi.string()
-            .email()
-            .required(),
+            .email().when('phone', { is: null, then: Joi.required() }),
+        phone: Joi.number().default(null),
         password: Joi.string().required(),
         role: ""
+    },
+};
+
+export const forgotPassword = {
+    body: {
+        email: Joi.string()
+            .email()
+            .required(),
+    },
+};
+
+export const resetPassword = {
+    body: {
+        password: Joi.string()
+            .required(),
     },
 };

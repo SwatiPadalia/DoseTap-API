@@ -51,4 +51,5 @@ router.post('/sync', validate(userValidator.sync), userController.syncData);
 
 
 router.get('/caretaker-schedule', doseController.getCareTakerSchedule)
+router.post('/caretaker-schedule',validate(doseValidator.acceptReject), doseController.acceptRejectCareTakerSchedule)
 module.exports = router;
