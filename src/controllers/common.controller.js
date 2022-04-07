@@ -15,6 +15,7 @@ export const getDoseTapDocuments = async (req, res) => {
         var document = {
             privacy: "https://dosetap-document.s3.ap-south-1.amazonaws.com/privacy.pdf",
             terms: "https://dosetap-document.s3.ap-south-1.amazonaws.com/terms.pdf",
+            faq: "https://dosetap-document.s3.ap-south-1.amazonaws.com/terms.pdf",
         }
         return successResponse(req, res, { document });
     } catch (error) {
