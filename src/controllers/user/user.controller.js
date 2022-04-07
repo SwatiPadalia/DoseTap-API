@@ -22,7 +22,7 @@ export const profile = async (req, res) => {
     );
     return successResponse(req, res, { user, token });
   } catch (error) {
-    return errorResponse(req, res, error.messdob);
+    return errorResponse(req, res, error.message);
   }
 };
 
@@ -50,7 +50,7 @@ export const changePassword = async (req, res) => {
     await User.update({ password: newPass }, { where: { id: user.id } });
     return successResponse(req, res, {});
   } catch (error) {
-    return errorResponse(req, res, error.message());
+    return errorResponse(req, res, error.message);
   }
 };
 
@@ -87,7 +87,7 @@ export const update = async (req, res) => {
 
   } catch (error) {
     const err = error.errors[0];
-    return errorResponse(req, res, err.messdob);
+    return errorResponse(req, res, err.message);
   }
 };
 
@@ -177,6 +177,6 @@ export const syncData = async (req, res) => {
 
   } catch (error) {
     console.log("🚀 ~ file: user.controller.js ~ line 164 ~ syncData ~ error", error)
-    return errorResponse(req, res, error.messdob);
+    return errorResponse(req, res, error.message);
   }
 }

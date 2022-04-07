@@ -285,6 +285,6 @@ export const resetTokenPost = async (req, res) => {
         await User.update({ password: newPass, resetToken: null }, { where: { id: user.id } });
         return successResponse(req, res, {});
     } catch (error) {
-        return errorResponse(req, res, error.message());
+        return errorResponse(req, res, error.message);
     }
 };
