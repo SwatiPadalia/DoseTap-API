@@ -231,11 +231,11 @@ export const forgotPassword = async (req, res) => {
         isUser.save();
 
         if (env == "development")
-            verificationLink = `http://localhost:3001/reset/${randomToken}`;
+            verificationLink = `http://localhost:3001/reset-password/${randomToken}`;
         else if (env == "test")
-            verificationLink = `https://dev.dosetap.com/reset/${randomToken}`;
+            verificationLink = `https://dev.dosetap.com/reset-password/${randomToken}`;
         else
-            verificationLink = `https://portal.dosetap.com/reset/${randomToken}`;
+            verificationLink = `https://portal.dosetap.com/reset-password/${randomToken}`;
 
         //send email code
         return successResponse(req, res, verificationLink);
@@ -282,7 +282,7 @@ export const resetTokenPost = async (req, res) => {
             .update(req.body.password)
             .digest('hex');
 
-        await User.update({ password: newPass }, { where: { id: user.id } });
+        await User.update({ password: newPass, resetToken: null }, { where: { id: user.id } });
         return successResponse(req, res, {});
     } catch (error) {
         return errorResponse(req, res, error.message());
