@@ -2,6 +2,7 @@ import express from 'express';
 import validate from 'express-validation';
 import * as alarmController from '../controllers/user/alarm/alarm.controller';
 import * as alarmValidator from '../controllers/user/alarm/alarm.validator';
+import * as deviceController from '../controllers/user/device/device.controller';
 import * as doseController from '../controllers/user/dose/dose.controller';
 import * as doseValidator from '../controllers/user/dose/dose.validator';
 import * as feedController from "../controllers/user/feed/feed.controller";
@@ -51,5 +52,10 @@ router.post('/sync', validate(userValidator.sync), userController.syncData);
 
 
 router.get('/caretaker-schedule', doseController.getCareTakerSchedule)
-router.post('/caretaker-schedule',validate(doseValidator.acceptReject), doseController.acceptRejectCareTakerSchedule)
+router.post('/caretaker-schedule', validate(doseValidator.acceptReject), doseController.acceptRejectCareTakerSchedule)
+
+
+router.post('/invite-caretaker', validate(userValidator.inviteCaretaker), userController.inviteCaretaker)
+
+router.post('/device/reset', deviceController.resetDevice)
 module.exports = router;

@@ -38,3 +38,12 @@ export const sync = {
     serialNumber: Joi.string().required()
   },
 };
+
+export const inviteCaretaker = {
+  body: {
+    firstName: Joi.string().required(),
+    lastName: Joi.string(),
+    phone: Joi.number().required(),
+    email: Joi.string().email(),
+  },
+};

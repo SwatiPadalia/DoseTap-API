@@ -1,6 +1,6 @@
 import { errorResponse, successResponse } from '../../../helpers';
 const { Op } = require('sequelize');
-const { ScheduleDose, Medicine, User, CareTakerScheduleDose } = require('../../../models');
+const { ScheduleDose, Medicine, User, CareTakerScheduleDose, CareTakerUserSlot, Slot } = require('../../../models');
 
 
 export const scheduleDose = async (req, res) => {
@@ -106,7 +106,59 @@ export const getCareTakerSchedule = async (req, res) => {
       },
       include: [{ model: Medicine, as: 'medicineDetails' }, { model: User, as: 'patientDetails' }]
     });
-    return successResponse(req, res, { doses });
+
+    let user_slot = await CareTakerUserSlot.findAll({
+      where: {
+        user_id: patient_id
+      },
+      include: [{ model: Slot, as: 'slots' }]
+    })
+
+    if (user_slot.length == 0) {
+      const slotsData = await Slot.findAll({
+        order: [['id', 'ASC']],
+      });
+      user_slot = slotsData.map(s => {
+        return {
+          id: s.id,
+          name: s.name,
+          type: s.type,
+          startTime: s.startTime,
+          endTime: s.endTime,
+          order: s.order,
+          displayName: s.displayName,
+          displayType: s.displayType,
+          time: null,
+          createdAt: s.createdAt,
+          updatedAt: s.updatedAt
+        }
+      });
+
+    } else {
+      user_slot = user_slot.map(s => {
+        return {
+          id: s.slot_id,
+          name: s.slots.name,
+          type: s.slots.type,
+          startTime: s.slots.startTime,
+          endTime: s.slots.endTime,
+          order: s.slots.order,
+          displayName: s.slots.displayName,
+          displayType: s.slots.displayType,
+          time: s.time,
+          createdAt: s.createdAt,
+          updatedAt: s.updatedAt
+        }
+      });
+
+    }
+
+    const slots = {
+      count: user_slot.length,
+      rows: user_slot
+    }
+
+    return successResponse(req, res, { doses, slots });
   } catch (error) {
     console.log(error);
     return errorResponse(req, res, error.message);

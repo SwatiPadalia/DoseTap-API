@@ -180,3 +180,11 @@ export const syncData = async (req, res) => {
     return errorResponse(req, res, error.message);
   }
 }
+
+export const inviteCaretaker = async (req, res) => {
+  try {
+    return successResponse(req, res, {});
+  } catch (error) {
+    return errorResponse(req, res, error.message);
+  }
+}
