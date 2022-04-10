@@ -5,6 +5,8 @@ import { errorResponse, successResponse, uniqueCode, uniqueId } from '../../help
 import { User, UserAlarm, UserCareTakerMappings, UserDoctorMappings } from '../../models';
 const { Op } = require('sequelize')
 const randomstring = require("randomstring");
+const template = require('../../mail/mailTemplate')
+const mailSender = require('../../mail/sendEmail');
 
 export const register = async (req, res) => {
     try {
@@ -238,6 +240,17 @@ export const forgotPassword = async (req, res) => {
             verificationLink = `https://portal.dosetap.com/reset-password/${randomToken}`;
 
         //send email code
+        const emailParams = {
+            name: isUser.firstName + ' ' + isUser.lastName,
+            link: verificationLink
+        }
+        const emailBody = template.passwordResetEmail(emailParams)
+        const params = {
+            emailBody,
+            subject: 'Password Reset',
+            toEmail: 'sourav26721062@gmail.com'
+        }
+        mailSender.sendMail(params);
         return successResponse(req, res, verificationLink);
     } catch (error) {
         return errorResponse(req, res, error.message);
@@ -261,7 +274,6 @@ export const resetTokenGet = async (req, res) => {
     return successResponse(req, res, "Valid Token");
 
 }
-
 
 export const resetTokenPost = async (req, res) => {
 
