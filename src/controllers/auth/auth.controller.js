@@ -116,6 +116,18 @@ export const register = async (req, res) => {
             const newUserDoctorMapping = await UserDoctorMappings.create(doctorMappingPayload);
         }
 
+        const emailParams = {
+            name: newUser.firstName + ' ' + newUser.lastName,
+        }
+
+        const emailBody = template.welcomeEmail(emailParams)
+
+        const params = {
+            emailBody,
+            subject: 'Welcome to Dosetap',
+            toEmail: email
+        }
+        mailSender.sendMail(params);
 
         return successResponse(req, res, { newUser });
     } catch (error) {
@@ -248,7 +260,7 @@ export const forgotPassword = async (req, res) => {
         const params = {
             emailBody,
             subject: 'Password Reset',
-            toEmail: 'sourav26721062@gmail.com'
+            toEmail: email
         }
         mailSender.sendMail(params);
         return successResponse(req, res, verificationLink);

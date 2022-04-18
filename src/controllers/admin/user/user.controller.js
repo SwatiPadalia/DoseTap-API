@@ -4,6 +4,8 @@ import { Adherence, Company, DeviceUserMapping, User, UserCareTakerMappings, Use
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 const randomstring = require("randomstring");
+const template = require('../../../mail/mailTemplate')
+const mailSender = require('../../../mail/sendEmail');
 
 export const create = async (req, res) => {
     try {
@@ -56,6 +58,8 @@ export const create = async (req, res) => {
             .update(password)
             .digest('hex');
 
+        const code = uniqueCode('lowercase', 4, 4, randomstring.generate(10))
+
         let payload = {
             email,
             firstName,
@@ -65,7 +69,7 @@ export const create = async (req, res) => {
             isVerified: false,
             verifyToken: uniqueId(),
             role,
-            reference_code: (role == "user" || role == "doctor") ? uniqueCode('lowercase', 4, 4, randomstring.generate(10)) : null,
+            reference_code: (role == "user" || role == "doctor") ? code : null,
             gender,
             dob,
             phone,
@@ -94,6 +98,27 @@ export const create = async (req, res) => {
             console.log("doctorMappingPayload", doctorMappingPayload)
             const newUserDoctorMapping = await UserDoctorMappings.create(doctorMappingPayload);
         }
+
+        const emailParams = {
+            name: newUser.firstName + ' ' + newUser.lastName,
+            code,
+            email,
+            password
+        }
+
+        let emailBody;
+        if (role == "caretaker" || role == "doctor") {
+            emailBody = template.welcomeAdminWithCodeEmail(emailParams)
+        } else {
+            emailBody = template.welcomeAdminEmail(emailParams)
+        }
+
+        const params = {
+            emailBody,
+            subject: 'Welcome to Dosetap',
+            toEmail: email
+        }
+        mailSender.sendMail(params);
 
         return successResponse(req, res, { newUser });
     } catch (error) {
