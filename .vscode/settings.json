@@ -1,3 +1,9 @@
 {
-  "cSpell.words": ["DATEONLY", "dosetap", "Norvasc", "randomstring"]
+  "cSpell.words": [
+    "DATEONLY",
+    "dosetap",
+    "Norvasc",
+    "randomstring"
+  ],
+  "nuxt.isNuxtApp": false
 }
