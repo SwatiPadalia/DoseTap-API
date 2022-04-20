@@ -49,14 +49,14 @@ export const tracker = async (req, res) => {
             else missedTill += 1
         })
 
-        const tillNow = openTill / (openTill + missedTill) * 100
+        const tillNow = (openTill / (openTill + missedTill) * 100) || 0
 
 
         let new_date = new Date(date);
         let lastDay = new Date(new_date.getFullYear(), new_date.getMonth() + 1, 0);
         let fromDate = new_date.toISOString().slice(0, 10).slice(0, -2) + "01"
         let toDate = new_date.toISOString().slice(0, 10).slice(0, -2) + lastDay.getDate()
-        
+
         let missedTillMonth = 0;
         let openTillMonth = 0
         const adherenceTillMonth = await Adherence.findAll({
@@ -72,7 +72,7 @@ export const tracker = async (req, res) => {
             else missedTillMonth += 1
         })
 
-        const tillMonth = openTillMonth / (openTillMonth + missedTillMonth) * 100
+        const tillMonth = (openTillMonth / (openTillMonth + missedTillMonth) * 100) || 0
 
         return successResponse(req, res, { morning, afternoon, evening, night, tillNow, tillMonth });
     } catch (error) {
