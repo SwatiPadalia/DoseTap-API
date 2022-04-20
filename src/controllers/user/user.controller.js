@@ -100,6 +100,7 @@ export const syncData = async (req, res) => {
       appVersion,
       firmwareVersion,
       serialNumber,
+      device_data
     } = req.body;
 
     const user = await User.findOne({ where: { id: userId } });
@@ -171,6 +172,11 @@ export const syncData = async (req, res) => {
         company_id: deviceCompanyMapping.company_id,
         lastSync
       });
+    }
+
+
+    if (device_data.length > 0) {
+
     }
 
     return successResponse(req, res, {});
