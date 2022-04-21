@@ -61,4 +61,5 @@ router.post('/invite-caretaker', validate(userValidator.inviteCaretaker), userCo
 router.post('/device/reset', deviceController.resetDevice)
 
 router.post('/tracker', userDeviceDataController.tracker);
+router.post('/report', userDeviceDataController.report);
 module.exports = router;

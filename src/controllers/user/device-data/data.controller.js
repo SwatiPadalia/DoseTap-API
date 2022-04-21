@@ -79,3 +79,34 @@ export const tracker = async (req, res) => {
         return errorResponse(req, res, error.message);
     }
 };
+
+
+
+export const report = async (req, res) => {
+    try {
+        const { userId } = req.user;
+
+        const { fromDate, toDate } = req.body;
+
+        let open = 0;
+        let missed = 0;
+        const adherence = await Adherence.findAll({
+            where: {
+                patient_id: userId,
+                date: {
+                    [Op.between]: [fromDate, toDate]
+                }
+            }
+        })
+        adherence.map(d => {
+            if (d.status == "open") open += 1
+            else missed += 1
+        })
+
+        const adherencePercentage = (open / (open + missed) * 100) || 0
+
+        return successResponse(req, res, { open, missed, adherencePercentage });
+    } catch (error) {
+        return errorResponse(req, res, error.message);
+    }
+};
