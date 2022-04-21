@@ -36,7 +36,7 @@ export const sync = {
     appVersion: Joi.string().required(),
     firmwareVersion: Joi.string().required(),
     serialNumber: Joi.string().required(),
-    device_data: Joi.array().items(Joi.string())
+    device_data: Joi.string().min(0).allow('').allow(null),
   },
 };
 

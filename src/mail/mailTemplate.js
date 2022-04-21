@@ -138,3 +138,37 @@ export const welcomeAdminWithCodeEmail = (params) => {
     return emailBody;
 
 }
+
+
+export const inviteCaretakerEmail = (params) => {
+
+    var email = {
+        body: {
+            name: params.to,
+            intro: `You have been invited to DoseTap by ${params.from}. Please use below code to signup as caregiver.`,
+            table: {
+                data: [
+                    {
+                        code: params.code,
+                    }
+                ]
+            },
+            action: [
+                {
+                    instructions: 'Go to the website and find the link to download the app',
+                    button: {
+                        color: '#319ECD',
+                        text: 'Link to website',
+                        link: 'https://www.dosetap.com/'
+                    }
+                }
+            ],
+            outro: 'Need help, or have questions? Just reply to this email, we\'d love to help.'
+        }
+    };
+
+    var emailBody = mailGenerator.generate(email);
+
+    return emailBody;
+
+}
