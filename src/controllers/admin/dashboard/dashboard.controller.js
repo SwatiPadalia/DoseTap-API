@@ -80,6 +80,8 @@ export const all = async (req, res) => {
         data.avg_adherence_open = (adherence_open_count / total) ? (adherence_open_count / total) * 100 : 0;
         data.avg_adherence_missed = (adherence_missed_count / total) ? (adherence_missed_count / total) * 100 : 0;
 
+        data.avg_adherence_open = data.avg_adherence_open.toFixed(2);
+        data.avg_adherence_missed = data.avg_adherence_missed.toFixed(2);
         const active_users = await DeviceUserMapping.findAndCountAll({
             where: {
                 lastSync: {
