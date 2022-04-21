@@ -1,6 +1,6 @@
 import { errorResponse, successResponse } from '../../../helpers';
 const { Op } = require('sequelize');
-const { ScheduleDose, Medicine, User, CareTakerScheduleDose, CareTakerUserSlot, Slot } = require('../../../models');
+const { ScheduleDose, Medicine, User, CareTakerScheduleDose, CareTakerUserSlot, Slot, UserSlot, UserAlarm } = require('../../../models');
 
 
 export const scheduleDose = async (req, res) => {
@@ -175,6 +175,85 @@ export const acceptRejectCareTakerSchedule = async (req, res) => {
       //Mail that its rejected
     }
 
+
+    if (status) {
+      // Delete from User Slot
+      await UserSlot.destroy({
+        where: {
+          user_id: patient_id
+        }
+      })
+
+      // Delete from ScheduleDose
+      await ScheduleDose.destroy({
+        where: {
+          patient_id
+        }
+      })
+
+      // Delete from UserAlarm
+      await UserAlarm.destroy({
+        where: {
+          user_id: patient_id
+        }
+      })
+
+      // Copy from CareTakerScheduleDose to ScheduleDose
+
+
+      let careTakerScheduleDose = await CareTakerScheduleDose.findAll({
+        where: {
+          patient_id
+        }
+        ,
+      })
+
+      for (let i = 0; i < careTakerScheduleDose.length; i++) {
+        let payload = {
+          patient_id: careTakerScheduleDose[i].patient_id,
+          medicine_id: careTakerScheduleDose[i].medicine_id,
+          count_morning: careTakerScheduleDose[i].count_morning,
+          count_afternoon: careTakerScheduleDose[i].count_afternoon,
+          count_evening: careTakerScheduleDose[i].count_evening,
+          count_night: careTakerScheduleDose[i].count_night,
+          slot_ids: careTakerScheduleDose[i].slot_ids,
+          days: careTakerScheduleDose[i].days,
+        }
+
+        console.log("🚀 ~ file: dose.controller.js ~ line 207 ~ acceptRejectCareTakerSchedule ~ payload", payload)
+        await ScheduleDose.create(payload)
+      }
+
+      // Copy from CareTakerSlot to User Slot
+
+      let careTakerUserSlot = await CareTakerUserSlot.findAll({
+        where: {
+          user_id: patient_id
+        }
+      })
+
+      for (let j = 0; j < careTakerUserSlot.length; j++) {
+        let payload = {
+          user_id: careTakerUserSlot[j].user_id,
+          slot_id: careTakerUserSlot[j].slot_id,
+          time: careTakerUserSlot[j].time
+        }
+
+        console.log("🚀 ~ file: dose.controller.js ~ line 216 ~ acceptRejectCareTakerSchedule ~ payload", payload)
+        await UserSlot.create(payload)
+      }
+
+
+    }
+
+    // Delete from CareTakerSlot
+    await CareTakerUserSlot.destroy({
+      where: {
+        user_id: patient_id
+      }
+    })
+
+    // Delete from CareTakerScheduleDose
     await CareTakerScheduleDose.destroy({
       where: {
         patient_id
