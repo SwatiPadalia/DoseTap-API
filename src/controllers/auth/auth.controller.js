@@ -139,6 +139,10 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
     try {
         let user, email, phone;
+
+        let { guard } = req.body;
+        if (guard != undefined && guard == 'web')
+            throw new Error('Login not allowed');
         if (req.body.email != undefined) {
             email = req.body.email
             user = await User.scope('withSecretColumns').findOne({
