@@ -141,8 +141,7 @@ export const login = async (req, res) => {
         let user, email, phone;
 
         let { guard } = req.body;
-        if (guard != undefined && guard == 'web')
-            throw new Error('Login not allowed');
+
         if (req.body.email != undefined) {
             email = req.body.email
             user = await User.scope('withSecretColumns').findOne({
@@ -154,6 +153,11 @@ export const login = async (req, res) => {
             user = await User.scope('withSecretColumns').findOne({
                 where: { phone },
             });
+        }
+
+        if (guard != undefined && guard == 'web') {
+            if (user.role == 'caretaker' || user.role == 'user')
+                throw new Error('Login not allowed!');
         }
 
         console.log("🚀 ~ file: auth.controller.js ~ line 131 ~ user ~ user", user)
