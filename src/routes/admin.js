@@ -29,6 +29,7 @@ router.get('/user/:id', userController.findById);
 router.post('/user', validate(userValidator.createUser), userController.create);
 router.put('/user/:id', validate(userValidator.editUser), userController.update);
 router.put('/user/:id/status', userController.statusUpdate);
+router.get('/user/:id/doses', userController.doses);
 
 // Device
 

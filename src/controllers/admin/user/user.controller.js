@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { errorResponse, successResponse, uniqueCode, uniqueId } from '../../../helpers';
-import { Adherence, Company, DeviceUserMapping, User, UserCareTakerMappings, UserDoctorMappings } from '../../../models';
+import { Adherence, Company, DeviceUserMapping, Medicine, ScheduleDose, User, UserCareTakerMappings, UserDoctorMappings } from '../../../models';
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 const randomstring = require("randomstring");
@@ -544,6 +544,25 @@ export const patientUnderDoctor = async (req, res) => {
     } catch (error) {
         console.log("🚀 ~ file: user.controller.js ~ line 307 ~ caretakerMapping ~ error", error)
 
+        return errorResponse(req, res, error.message);
+    }
+}
+
+
+export const doses = async (req, res) => {
+    try {
+        const patient_id = req.params.id;
+        const data = await ScheduleDose.findAll({
+            where: {
+                patient_id
+            },
+
+            include: {
+                model: Medicine, as: 'medicineDetails',
+            }
+        })
+        return successResponse(req, res, { data })
+    } catch (error) {
         return errorResponse(req, res, error.message);
     }
 }
