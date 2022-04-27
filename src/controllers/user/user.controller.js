@@ -182,9 +182,12 @@ export const syncData = async (req, res) => {
         const splitData = device_data.split(',').slice(0, -1);
         for (let i = 0; i < splitData.length;) {
 
+          console.log(" >>>>>>>>>>>", splitData[i])
+
+
           let payload = {
             patient_id: userId,
-            status: splitData[i] == "Open" ? "Open" : "Missed",
+            status: splitData[i].toLowerCase() == "open" ? "Open" : "Missed",
             date: splitData[i + 1].substring(8, 12) + "-" + splitData[i + 1].substring(6, 8) + "-" + splitData[i + 1].substring(4, 6),
             time: splitData[i + 1].substring(0, 2) + ":" + splitData[i + 1].substring(2, 4) + ":00"
           }
