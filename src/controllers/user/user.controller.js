@@ -180,7 +180,7 @@ export const syncData = async (req, res) => {
     if (device_data != undefined) {
       if (device_data.length > 0) {
         console.log(" >>>>>>>>>>>", device_data)
-        const splitData = device_data.split(',').slice(0, -1);
+        const splitData = device_data.split(',');
         for (let i = 0; i < splitData.length;) {
 
           console.log(" >>>>>>>>>>>", splitData[i])

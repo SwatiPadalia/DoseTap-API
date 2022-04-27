@@ -1,6 +1,7 @@
 import { errorResponse, successResponse } from '../../../helpers';
-import { Adherence } from '../../../models';
+import { Adherence, DeviceUserMapping } from '../../../models';
 const { Op } = require('sequelize')
+const moment = require('moment');
 
 export const tracker = async (req, res) => {
     try {
@@ -9,20 +10,15 @@ export const tracker = async (req, res) => {
         const { date } = req.body;
         // const user = await User.findOne({ where: { id: userId } });
 
-        let morning = false;
-        let afternoon = false;
-        let evening = false;
-        let night = false;
+        let morning = 'NOT AVAILABLE';
+        let afternoon = 'NOT AVAILABLE';
+        let evening = 'NOT AVAILABLE';
+        let night = 'NOT AVAILABLE';
 
         let inputDate = new Date(date);
         let todaysDate = new Date();
 
         if (inputDate.setHours(0, 0, 0, 0) == todaysDate.setHours(0, 0, 0, 0)) {
-
-            morning = null;
-            afternoon = null;
-            evening = null;
-            night = null;
 
             var d = new Date();
             var curr_hour = d.getHours();
@@ -47,63 +43,125 @@ export const tracker = async (req, res) => {
 
             todays_adherence.map(d => {
                 const time = parseInt(d.time.split(':').join('').slice(0, -2))
-                console.log("🚀 ~ file: data.controller.js ~ line 50 ~ tracker ~ time", time)
+
                 if (time >= 900 && time <= 1100) {
                     if (d.status == "open")
-                        morning = true;
+                        morning = 'TAKEN';
                     else
-                        morning = false;
-                    afternoon = null;
-                    evening = null;
-                    night = null;
+                        morning = 'MISSED';
                 }
 
                 if (time >= 1200 && time <= 1400) {
                     if (d.status == "open")
-                        afternoon = true;
+                        afternoon = 'TAKEN';
                     else
-                        afternoon = false;
-                    evening = null;
-                    night = null;
+                        afternoon = 'MISSED';
                 }
                 if (time >= 1500 && time <= 1800) {
                     if (d.status == "open")
-                        evening = true;
+                        evening = 'TAKEN';
                     else
-                        evening = false;
-                    night = null;
+                        evening = 'MISSED';
                 }
                 if (time >= 1900 && time <= 2100) {
                     if (d.status == "open")
-                        night = true;
+                        night = 'TAKEN';
                     else
-                        night = false;
+                        night = 'MISSED';
                 }
             })
 
-        } else {
+            const timeNow = moment().format("HH:mm:ss");
+            console.log("🚀 ~ file: data.controller.js ~ line 79 ~ tracker ~ timeNow", timeNow)
+            const parsedTimeNow = parseInt(timeNow.split(':').join('').slice(0, -2))
+            console.log("🚀 ~ file: data.controller.js ~ line 77 ~ tracker ~ parsedTimeNow", parsedTimeNow)
 
-            const adherence = await Adherence.findAll({
+            if (morning != "TAKEN" || morning != "MISSED") {
+                if (parsedTimeNow >= 900 && parsedTimeNow <= 1100) {
+                    morning = 'DUE'
+                    afternoon = 'DUE'
+                    evening = 'DUE'
+                    night = 'DUE'
+                }
+            }
+            if (afternoon != "TAKEN" || afternoon != "MISSED") {
+                if (parsedTimeNow >= 1200 && parsedTimeNow <= 1400) {
+                    afternoon = 'DUE'
+                    evening = 'DUE'
+                    night = 'DUE'
+                }
+            }
+
+            if (evening != "TAKEN" || evening != "MISSED") {
+                if (parsedTimeNow >= 1500 && parsedTimeNow <= 1800) {
+                    evening = 'DUE'
+                    night = 'DUE'
+                }
+            }
+            if (night != "TAKEN" || night != "MISSED") {
+                if (parsedTimeNow >= 1900 && parsedTimeNow <= 2100) {
+                    night = 'DUE'
+                }
+            }
+
+        }
+        else {
+
+            let lastSyncData = await DeviceUserMapping.findOne({
+                limit: 1,
                 where: {
-                    patient_id: userId,
-                    date: {
-                        [Op.eq]: date
-                    }
+                    patient_id: userId
+                },
+                order: [['createdAt', 'DESC']]
+            })
+
+            console.log("🚀 ~ file: data.controller.js ~ line 94 ~ tracker ~ lastSyncData", lastSyncData)
+
+            if (lastSyncData) {
+                let lastSyncDate = require('moment')(lastSyncData.lastSync).format('YYYY-MM-DD')
+
+                console.log("🚀 ~ file: data.controller.js ~ line 31 ~ tracker ~ lastSyncDate", lastSyncDate)
+
+                if (inputDate.setHours(0, 0, 0, 0) > (new Date(lastSyncDate)).setHours(0, 0, 0, 0)) {
+
+                    morning = 'NOT AVAILABLE';
+                    afternoon = 'NOT AVAILABLE';
+                    evening = 'NOT AVAILABLE';
+                    night = 'NOT AVAILABLE';
+
+                } else {
+
+                    const adherence = await Adherence.findAll({
+                        where: {
+                            patient_id: userId,
+                            date: {
+                                [Op.eq]: date
+                            }
+                        }
+                    })
+
+                    adherence.map(d => {
+
+                        const time = parseInt(d.time.split(':').join('').slice(0, -2))
+                        if (time >= 900 && time <= 1100 && d.status == "open")
+                            morning = 'TAKEN'
+                        if (time >= 1200 && time <= 1400 && d.status == "open")
+                            afternoon = 'TAKEN'
+                        if (time >= 1500 && time <= 1800 && d.status == "open")
+                            evening = 'TAKEN'
+                        if (time >= 1900 && time <= 2100 && d.status == "open")
+                            night = 'TAKEN'
+                    })
                 }
-            })
 
-            adherence.map(d => {
+            } else {
 
-                const time = parseInt(d.time.split(':').join('').slice(0, -2))
-                if (time >= 900 && time <= 1100 && d.status == "open")
-                    morning = true
-                if (time >= 1200 && time <= 1400 && d.status == "open")
-                    afternoon = true
-                if (time >= 1500 && time <= 1800 && d.status == "open")
-                    evening = true
-                if (time >= 1900 && time <= 2100 && d.status == "open")
-                    night = true
-            })
+                morning = 'NOT AVAILABLE';
+                afternoon = 'NOT AVAILABLE';
+                evening = 'NOT AVAILABLE';
+                night = 'NOT AVAILABLE';
+            }
+
         }
 
 
