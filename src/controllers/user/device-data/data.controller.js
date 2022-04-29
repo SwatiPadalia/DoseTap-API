@@ -6,9 +6,7 @@ const moment = require('moment');
 export const tracker = async (req, res) => {
     try {
         const { userId } = req.user;
-
         const { date } = req.body;
-        // const user = await User.findOne({ where: { id: userId } });
 
         let morning = 'NOT AVAILABLE';
         let afternoon = 'NOT AVAILABLE';
@@ -20,12 +18,10 @@ export const tracker = async (req, res) => {
 
         if (inputDate.setHours(0, 0, 0, 0) == todaysDate.setHours(0, 0, 0, 0)) {
 
-            var d = new Date();
-            var curr_hour = d.getHours();
-            var curr_min = d.getMinutes();
-            curr_min = curr_min.toString().length == 1 ? "0" + curr_min : curr_min
-            var curr_time = curr_hour + ":" + curr_min + ":" + "00";
-            console.log(' True ', curr_time)
+            var dt = new Date();
+            let d = moment(dt).tz("Asia/Kolkata");
+            var curr_time = d.format("HH:mm:ss");
+            console.log("🚀 ~ file: data.controller.js ~ line 27 ~ tracker ~ curr_time", curr_time)
 
             const todays_adherence = await Adherence.findAll({
                 where: {
@@ -71,10 +67,14 @@ export const tracker = async (req, res) => {
                 }
             })
 
-            const timeNow = moment().format("HH:mm:ss");
-            console.log("🚀 ~ file: data.controller.js ~ line 79 ~ tracker ~ timeNow", timeNow)
-            const parsedTimeNow = parseInt(timeNow.split(':').join('').slice(0, -2))
-            console.log("🚀 ~ file: data.controller.js ~ line 77 ~ tracker ~ parsedTimeNow", parsedTimeNow)
+            const parsedTimeNow = parseInt(curr_time.split(':').join('').slice(0, -2))
+
+            if (parsedTimeNow < 900 && parsedTimeNow > 100) {
+                morning = 'DUE'
+                afternoon = 'DUE'
+                evening = 'DUE'
+                night = 'DUE'
+            }
 
             if (morning != "TAKEN" || morning != "MISSED") {
                 if (parsedTimeNow >= 900 && parsedTimeNow <= 1100) {
