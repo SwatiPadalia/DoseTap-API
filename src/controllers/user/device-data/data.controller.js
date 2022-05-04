@@ -231,7 +231,7 @@ export const report = async (req, res) => {
             else missed += 1
         })
 
-        const adherencePercentage = (open / (open + missed) * 100) || 0
+        const adherencePercentage = ((open / (open + missed) * 100)).toFixed(2) || 0
 
         return successResponse(req, res, { open, missed, adherencePercentage });
     } catch (error) {
