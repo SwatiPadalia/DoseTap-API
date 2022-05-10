@@ -1,0 +1,1 @@
+ssh dosetap-production -t 'cd api.dosetap.com;git pull; npm i;npm run migrate;pm2 reload 0'
