@@ -177,8 +177,7 @@ export const tracker = async (req, res) => {
             else missedTill += 1
         })
 
-        const tillNow = (openTill / (openTill + missedTill) * 100).toFixed(2) || 0
-
+        const tillNow = (openTill / (openTill + missedTill) * 100) ? (openTill / (openTill + missedTill) * 100).toFixed(2) : 0
 
         let new_date = new Date(date);
         let lastDay = new Date(new_date.getFullYear(), new_date.getMonth() + 1, 0);
@@ -200,7 +199,7 @@ export const tracker = async (req, res) => {
             else missedTillMonth += 1
         })
 
-        const tillMonth = (openTillMonth / (openTillMonth + missedTillMonth) * 100).toFixed(2) || 0
+        const tillMonth = (openTillMonth / (openTillMonth + missedTillMonth) * 100) ? (openTillMonth / (openTillMonth + missedTillMonth) * 100).toFixed(2) : 0
 
         return successResponse(req, res, { morning, afternoon, evening, night, tillNow, tillMonth });
     } catch (error) {
