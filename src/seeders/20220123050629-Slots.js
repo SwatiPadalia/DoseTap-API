@@ -16,7 +16,7 @@ module.exports = {
         "name": "Morning",
         "type": "after",
         "startTime": "9 AM",
-        "endTime": "11 AM",
+        "endTime": "12 PM",
         "order": 2,
         "displayName": "Morning",
         "displayType": "after meals"
@@ -34,7 +34,7 @@ module.exports = {
         "name": "Afternoon",
         "type": "after",
         "startTime": "1 PM",
-        "endTime": "2 PM",
+        "endTime": "3 PM",
         "order": 4,
         "displayName": "Afternoon",
         "displayType": "after meals"
@@ -51,7 +51,7 @@ module.exports = {
         "name": "Evening",
         "type": "after",
         "startTime": "5 PM",
-        "endTime": "6 PM",
+        "endTime": "7 PM",
         "order": 6,
         "displayName": "Evening",
         "displayType": "after meals"
@@ -60,7 +60,7 @@ module.exports = {
         "name": "Night",
         "type": "before",
         "startTime": "7 PM",
-        "endTime": "8 PM",
+        "endTime": "9 PM",
         "order": 7,
         "displayName": "Night",
         "displayType": "before meals"
