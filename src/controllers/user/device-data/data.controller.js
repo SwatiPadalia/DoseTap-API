@@ -40,26 +40,26 @@ export const tracker = async (req, res) => {
             todays_adherence.map(d => {
                 const time = parseInt(d.time.split(':').join('').slice(0, -2))
 
-                if (time >= 900 && time <= 1100) {
+                if (time >= 500 && time < 1200) {
                     if (d.status == "open")
                         morning = 'TAKEN';
                     else
                         morning = 'MISSED';
                 }
 
-                if (time >= 1200 && time <= 1400) {
+                if (time >= 1200 && time < 1500) {
                     if (d.status == "open")
                         afternoon = 'TAKEN';
                     else
                         afternoon = 'MISSED';
                 }
-                if (time >= 1500 && time <= 1800) {
+                if (time >= 1500 && time < 1900) {
                     if (d.status == "open")
                         evening = 'TAKEN';
                     else
                         evening = 'MISSED';
                 }
-                if (time >= 1900 && time <= 2100) {
+                if (time >= 1900 && time <= 2300) {
                     if (d.status == "open")
                         night = 'TAKEN';
                     else
@@ -69,7 +69,7 @@ export const tracker = async (req, res) => {
 
             const parsedTimeNow = parseInt(curr_time.split(':').join('').slice(0, -2))
 
-            if (parsedTimeNow < 900 && parsedTimeNow > 100) {
+            if (parsedTimeNow < 500 && parsedTimeNow > 100) {
                 morning = 'DUE'
                 afternoon = 'DUE'
                 evening = 'DUE'
@@ -77,7 +77,7 @@ export const tracker = async (req, res) => {
             }
 
             if (morning != "TAKEN" || morning != "MISSED") {
-                if (parsedTimeNow >= 900 && parsedTimeNow <= 1100) {
+                if (parsedTimeNow >= 500 && parsedTimeNow < 1200) {
                     morning = 'DUE'
                     afternoon = 'DUE'
                     evening = 'DUE'
@@ -85,7 +85,7 @@ export const tracker = async (req, res) => {
                 }
             }
             if (afternoon != "TAKEN" || afternoon != "MISSED") {
-                if (parsedTimeNow >= 1200 && parsedTimeNow <= 1400) {
+                if (parsedTimeNow >= 1200 && parsedTimeNow <= 1500) {
                     afternoon = 'DUE'
                     evening = 'DUE'
                     night = 'DUE'
@@ -93,13 +93,13 @@ export const tracker = async (req, res) => {
             }
 
             if (evening != "TAKEN" || evening != "MISSED") {
-                if (parsedTimeNow >= 1500 && parsedTimeNow <= 1800) {
+                if (parsedTimeNow >= 1500 && parsedTimeNow < 1900) {
                     evening = 'DUE'
                     night = 'DUE'
                 }
             }
             if (night != "TAKEN" || night != "MISSED") {
-                if (parsedTimeNow >= 1900 && parsedTimeNow <= 2100) {
+                if (parsedTimeNow >= 1900 && parsedTimeNow <= 2300) {
                     night = 'DUE'
                 }
             }
@@ -143,13 +143,13 @@ export const tracker = async (req, res) => {
                     adherence.map(d => {
 
                         const time = parseInt(d.time.split(':').join('').slice(0, -2))
-                        if (time >= 900 && time <= 1100 && d.status == "open")
+                        if (time >= 500 && time < 1200 && d.status == "open")
                             morning = 'TAKEN'
-                        if (time >= 1200 && time <= 1400 && d.status == "open")
+                        if (time >= 1200 && time < 1500 && d.status == "open")
                             afternoon = 'TAKEN'
-                        if (time >= 1500 && time <= 1800 && d.status == "open")
+                        if (time >= 1500 && time < 1900 && d.status == "open")
                             evening = 'TAKEN'
-                        if (time >= 1900 && time <= 2100 && d.status == "open")
+                        if (time >= 1900 && time <= 2300 && d.status == "open")
                             night = 'TAKEN'
                     })
                 }
@@ -230,7 +230,7 @@ export const report = async (req, res) => {
             else missed += 1
         })
 
-        const adherencePercentage = ((open / (open + missed) * 100)).toFixed(2) || 0
+        const adherencePercentage = (open / (open + missed) * 100) ? ((open / (open + missed) * 100)).toFixed(2) : 0
 
         return successResponse(req, res, { open, missed, adherencePercentage });
     } catch (error) {
