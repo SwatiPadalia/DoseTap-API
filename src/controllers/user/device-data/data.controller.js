@@ -69,14 +69,14 @@ export const tracker = async (req, res) => {
 
             const parsedTimeNow = parseInt(curr_time.split(':').join('').slice(0, -2))
 
-            if (parsedTimeNow < 500 && parsedTimeNow > 100) {
+            if (parsedTimeNow < 500) {
                 morning = 'DUE'
                 afternoon = 'DUE'
                 evening = 'DUE'
                 night = 'DUE'
             }
 
-            if (morning != "TAKEN" || morning != "MISSED") {
+            if (morning != "TAKEN" && morning != "MISSED") {
                 if (parsedTimeNow >= 500 && parsedTimeNow < 1200) {
                     morning = 'DUE'
                     afternoon = 'DUE'
@@ -84,7 +84,7 @@ export const tracker = async (req, res) => {
                     night = 'DUE'
                 }
             }
-            if (afternoon != "TAKEN" || afternoon != "MISSED") {
+            if (afternoon != "TAKEN" && afternoon != "MISSED") {
                 if (parsedTimeNow >= 1200 && parsedTimeNow <= 1500) {
                     afternoon = 'DUE'
                     evening = 'DUE'
@@ -92,13 +92,13 @@ export const tracker = async (req, res) => {
                 }
             }
 
-            if (evening != "TAKEN" || evening != "MISSED") {
+            if (evening != "TAKEN" && evening != "MISSED") {
                 if (parsedTimeNow >= 1500 && parsedTimeNow < 1900) {
                     evening = 'DUE'
                     night = 'DUE'
                 }
             }
-            if (night != "TAKEN" || night != "MISSED") {
+            if (night != "TAKEN" && night != "MISSED") {
                 if (parsedTimeNow >= 1900 && parsedTimeNow <= 2300) {
                     night = 'DUE'
                 }
