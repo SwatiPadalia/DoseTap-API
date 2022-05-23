@@ -29,9 +29,9 @@ export const tracker = async (req, res) => {
                     date: {
                         [Op.eq]: date,
                     },
-                    time: {
-                        [Op.lte]: curr_time
-                    }
+                    // time: {
+                    // [Op.lte]: curr_time
+                    // }
                 }
             })
 
@@ -39,6 +39,7 @@ export const tracker = async (req, res) => {
 
             todays_adherence.map(d => {
                 const time = parseInt(d.time.split(':').join('').slice(0, -2))
+                console.log("🚀 ~ file: data.controller.js ~ line 42 ~ tracker ~ time", time)
 
                 if (time >= 500 && time < 1200) {
                     if (d.status == "open")
@@ -66,6 +67,13 @@ export const tracker = async (req, res) => {
                         night = 'MISSED';
                 }
             })
+
+            console.log("morning >>>", morning);
+            console.log("afternoon >>>>", afternoon);
+            console.log("evening >>>", evening);
+            console.log("night >>>> ", night);
+
+
 
             const parsedTimeNow = parseInt(curr_time.split(':').join('').slice(0, -2))
 
