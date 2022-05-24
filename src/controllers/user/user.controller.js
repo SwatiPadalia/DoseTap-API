@@ -182,10 +182,7 @@ export const syncData = async (req, res) => {
         console.log(" >>>>>>>>>>>", device_data)
         const splitData = device_data.replace(/\s/g, "").split(',');
         for (let i = 0; i < splitData.length;) {
-
-          console.log(" >>>>>>>>>>>", splitData[i])
-
-
+          console.log('Loop >>', i)
           let payload = {
             patient_id: userId,
             status: splitData[i].toLowerCase() == "open" ? "Open" : "Missed",

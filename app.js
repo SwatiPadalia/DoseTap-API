@@ -27,6 +27,16 @@ app.use(
 
 app.use(cors());
 app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+  console.log('[%s] URL -> %s', req.method, req.url);
+  if (req.method.toLowerCase() == 'post') {
+    console.log('BODY -> %s', req.body)
+  }
+  next();
+});
+
+
 app.use('/api', publicRoutes);
 app.use('/api/user', userMiddleware, userRoutes);
 app.use('/api/caretaker', userMiddleware, caretakerRoutes);
