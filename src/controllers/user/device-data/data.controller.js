@@ -123,8 +123,6 @@ export const tracker = async (req, res) => {
                 order: [['createdAt', 'DESC']]
             })
 
-            console.log("🚀 ~ file: data.controller.js ~ line 94 ~ tracker ~ lastSyncData", lastSyncData)
-
             if (lastSyncData) {
                 let lastSyncDate = require('moment')(lastSyncData.lastSync).format('YYYY-MM-DD')
 
