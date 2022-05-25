@@ -183,18 +183,26 @@ export const syncData = async (req, res) => {
         const splitData = device_data.replace(/\s/g, "").split(',');
         for (let i = 0; i < splitData.length;) {
           console.log('Loop >>', i)
+          console.log('length splitData[i].length >>', splitData[i + 1].length)
+          if (splitData[i + 1].length != 12) {
+            splitData[i + 1] = "0" + splitData[i + 1]
+          }
+          console.log("🚀 ~ file: user.controller.js ~ line 190 ~ syncData ~ splitData", splitData[i + 1])
+
           let payload = {
             patient_id: userId,
             status: splitData[i].toLowerCase() == "open" ? "Open" : "Missed",
             date: splitData[i + 1].substring(8, 12) + "-" + splitData[i + 1].substring(6, 8) + "-" + splitData[i + 1].substring(4, 6),
             time: splitData[i + 1].substring(0, 2) + ":" + splitData[i + 1].substring(2, 4) + ":00"
           }
+          console.log("🚀 ~ file: user.controller.js ~ line 198 ~ syncData ~ payload", payload)
 
           const isExist = await Adherence.findAll({
             where: {
               ...payload
             }
           })
+          console.log("🚀 ~ file: user.controller.js ~ line 205 ~ syncData ~ isExist", isExist.length)
 
           if (isExist.length > 0) {
             i = i + 2;
