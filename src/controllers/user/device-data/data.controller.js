@@ -149,14 +149,24 @@ export const tracker = async (req, res) => {
                     adherence.map(d => {
 
                         const time = parseInt(d.time.split(':').join('').slice(0, -2))
-                        if (time >= 500 && time < 1200 && d.status == "open")
-                            morning = 'TAKEN'
-                        if (time >= 1200 && time < 1500 && d.status == "open")
-                            afternoon = 'TAKEN'
-                        if (time >= 1500 && time < 1900 && d.status == "open")
-                            evening = 'TAKEN'
-                        if (time >= 1900 && time <= 2300 && d.status == "open")
-                            night = 'TAKEN'
+                        console.log("🚀 ~ file: data.controller.js ~ line 152 ~ tracker ~ time", time)
+                        if (time >= 500 && time < 1200) {
+                            if (d.status == "open") morning = 'TAKEN'
+                            else morning = 'MISSED'
+                        }
+
+                        if (time >= 1200 && time < 1500) {
+                            if (d.status == "open") afternoon = 'TAKEN'
+                            else afternoon = 'MISSED'
+                        }
+                        if (time >= 1500 && time < 1900) {
+                            if (d.status == "open") evening = 'TAKEN'
+                            else evening = 'MISSED'
+                        }
+                        if (time >= 1900 && time <= 2300) {
+                            if (d.status == "open") night = 'TAKEN'
+                            else night = 'MISSED'
+                        }
                     })
                 }
 
