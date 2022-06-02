@@ -25,6 +25,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TIME,
       allowNull: false,
     },
+    slot_id: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Slot',
+        key: 'id'
+      },
+      allowNull: false,
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
+    },
   }, {
     tableName: 'Adherence'
   });
