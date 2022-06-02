@@ -5,5 +5,7 @@ const router = express.Router();
 
 router.get('/medicine/:id/adherence', commonController.report);
 
+router.get('/medicine-adherence', commonController.medicineAdherenceData)
+
 
 module.exports = router;
