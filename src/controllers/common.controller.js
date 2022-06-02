@@ -1,8 +1,14 @@
 import { errorResponse, successResponse } from "../helpers";
 import { states } from "../helpers/IndianStatesDistricts.json";
 import mailSender from "../mail/sendEmail";
-import { Adherence, ScheduleDose } from "../models";
+import {
+  Adherence,
+  DeviceUserMapping,
+  Medicine,
+  ScheduleDose,
+} from "../models";
 const { Op } = require("sequelize");
+const sequelize = require("sequelize");
 
 export const getStates = async (req, res) => {
   try {
@@ -48,13 +54,64 @@ export const supportMail = async (req, res) => {
 export const report = async (req, res) => {
   try {
     const id = req.params.id;
-    let dateToFilter = null;
     let totalOpen = 0;
     let totalMissed = 0;
+    const role = req.user.role;
+    let dateToFilter = null,
+      stateFilter = null,
+      genderFilter = null,
+      ageFilter = null;
+
+    console.log(
+      "🚀 ~ file: common.controller.js ~ line 55 ~ report ~ role",
+      role
+    );
+    let mapped_user_ids = [];
+
+    if (role == "admin") {
+      mapped_user_ids = [
+        ...(await DeviceUserMapping.findAll({
+          attributes: ["patient_id"],
+          raw: true,
+        })),
+      ].map((user) => user.patient_id);
+    }
+
+    if (role == "company") {
+      mapped_user_ids = [
+        ...(await DeviceUserMapping.findAll({
+          where: {
+            company_id: req.user.company_id,
+          },
+          attributes: ["patient_id"],
+          raw: true,
+        })),
+      ].map((user) => user.patient_id);
+    }
+
+    if (role == "doctor") {
+      mapped_user_ids = [
+        ...(await DeviceUserMapping.findAll({
+          where: {
+            doctor_id: req.user.id,
+          },
+          attributes: ["patient_id"],
+          raw: true,
+        })),
+      ].map((user) => user.patient_id);
+    }
+
+    console.log(
+      "🚀 ~ file: common.controller.js ~ line 67 ~ report ~ mapped_user_ids",
+      mapped_user_ids
+    );
 
     let patients = await ScheduleDose.findAll({
       where: {
         medicine_id: id,
+        patient_id: {
+          [Op.in]: mapped_user_ids,
+        },
       },
       distinct: true,
       col: "ScheduleDose.patient_id",
@@ -97,6 +154,116 @@ export const report = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    return errorResponse(req, res, error.message);
+  }
+};
+
+export const medicineAdherenceData = async (req, res) => {
+  try {
+    let searchFilter = null;
+
+    const role = req.user.role;
+
+    const sort = req.query.sort || -1;
+
+    let mapped_user_ids = [];
+
+    if (role == "admin") {
+      mapped_user_ids = [
+        ...(await DeviceUserMapping.findAll({
+          attributes: ["patient_id"],
+          raw: true,
+        })),
+      ].map((user) => user.patient_id);
+    }
+
+    if (role == "company") {
+      mapped_user_ids = [
+        ...(await DeviceUserMapping.findAll({
+          where: {
+            company_id: req.user.company_id,
+          },
+          attributes: ["patient_id"],
+          raw: true,
+        })),
+      ].map((user) => user.patient_id);
+    }
+
+    if (role == "doctor") {
+      mapped_user_ids = [
+        ...(await DeviceUserMapping.findAll({
+          where: {
+            doctor_id: req.user.id,
+          },
+          attributes: ["patient_id"],
+          raw: true,
+        })),
+      ].map((user) => user.patient_id);
+    }
+
+    if (req.query.search) {
+      const search = req.query.search;
+
+      searchFilter = {
+        [Op.or]: [
+          sequelize.where(sequelize.fn("LOWER", sequelize.col("name")), {
+            [Op.like]: `%${search}%`,
+          }),
+          sequelize.where(sequelize.fn("LOWER", sequelize.col("companyName")), {
+            [Op.like]: `%${search}%`,
+          }),
+        ],
+      };
+    }
+
+    const page = req.query.page || 1;
+    const limit = 10;
+    const sortOrder = sort == -1 ? "ASC" : "DESC";
+    const medicines = await Medicine.findAndCountAll({
+      where: {
+        [Op.and]: [searchFilter === null ? undefined : { searchFilter }],
+      },
+      order: [["name", "ASC"]],
+      offset: (page - 1) * limit,
+      limit,
+    });
+
+    const medicineResult = {
+      count: 0,
+      rows: [],
+    };
+
+    medicineResult.count = medicines.count;
+
+    console.log("mapped_user_ids >>", mapped_user_ids);
+    for (const m of medicines.rows) {
+      const count = await ScheduleDose.findAndCountAll({
+        where: {
+          medicine_id: m.id,
+          patient_id: {
+            [Op.in]: mapped_user_ids,
+          },
+        },
+        distinct: true,
+        col: "patient_id",
+      });
+      let medicine = {
+        id: m.id,
+        name: m.name,
+        companyName: m.companyName,
+        count: count.count,
+      };
+
+      medicineResult.rows.push(medicine);
+    }
+    return successResponse(req, res, {
+      medicines: {
+        ...medicineResult,
+        currentPage: parseInt(page),
+        totalPage: Math.ceil(medicines.count / limit),
+      },
+    });
+  } catch (error) {
     return errorResponse(req, res, error.message);
   }
 };
