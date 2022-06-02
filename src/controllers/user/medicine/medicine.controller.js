@@ -1,5 +1,5 @@
 import { errorResponse, successResponse } from '../../../helpers';
-import { Medicine } from '../../../models';
+import { Medicine, ScheduleDose } from '../../../models';
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 

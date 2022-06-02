@@ -9,6 +9,7 @@ import errorHandler from './src/middleware/errorHandler';
 import userMiddleware from './src/middleware/userAuth';
 import adminRoutes from './src/routes/admin';
 import caretakerRoutes from './src/routes/caretaker';
+import commonRoutes from './src/routes/common';
 import companyRoutes from './src/routes/company';
 import doctorRoutes from './src/routes/doctor';
 import publicRoutes from './src/routes/public';
@@ -38,6 +39,7 @@ app.use((req, res, next) => {
 
 
 app.use('/api', publicRoutes);
+app.use('/api/common', userMiddleware, commonRoutes);
 app.use('/api/user', userMiddleware, userRoutes);
 app.use('/api/caretaker', userMiddleware, caretakerRoutes);
 app.use('/api/admin', userMiddleware, adminMiddleware, adminRoutes);
