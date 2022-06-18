@@ -18,6 +18,7 @@ export const adherenceData = async (req, res) => {
         let bucket_80_50 = 0;
         let bucket_50_30 = 0;
         let bucket_30 = 0;
+        let avg_adherence = 0;
 
         if (req.query.state) {
             const state = req.query.state;
@@ -86,6 +87,7 @@ export const adherenceData = async (req, res) => {
             }
         }
 
+        let total_avg_adherence = 0;
         for (const u of users) {
 
             const adherence_open = await Adherence.findAndCountAll({
@@ -102,21 +104,23 @@ export const adherenceData = async (req, res) => {
 
             let total = adherence_open.count + adherence_missed.count
             let avg = (adherence_open.count / total) * 100 || 0
-
+            total_avg_adherence = total_avg_adherence + avg;
             if (avg <= 100 && avg >= 80) bucket_100_80++;
             if (avg < 80 && avg >= 50) bucket_80_50++;
             if (avg < 50 && avg >= 30) bucket_50_30++;
-            if (avg < 30) bucket_30++;
+            if (avg < 30 && avg > 0) bucket_30++;
 
 
         }
+        avg_adherence = total_avg_adherence / users.length || 0
 
         return successResponse(req, res, {
             users,
             bucket_100_80,
             bucket_80_50,
             bucket_50_30,
-            bucket_30
+            bucket_30,
+            avg_adherence
         });
 
     } catch (error) {
