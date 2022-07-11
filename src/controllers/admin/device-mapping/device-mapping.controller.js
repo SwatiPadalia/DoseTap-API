@@ -76,7 +76,10 @@ export const completeMapping = async (req, res) => {
                 [Op.or]: [
                     sequelize.where(
                         sequelize.fn('LOWER', sequelize.col('device.serialNumber')), { [Op.like]: `%${search}%` }
-                    )
+                    ),
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('company.name')), { [Op.like]: `%${search}%` }
+                    ),
                 ]
             }
         }
@@ -114,6 +117,9 @@ export const completeMapping = async (req, res) => {
                 },
                 {
                     model: Company, as: 'company',
+                    where: {
+                        [Op.and]: [searchDeviceFilter === null ? undefined : { searchDeviceFilter }]
+                    },
                 }
             ],
             order: [['id', sortOrder]],
