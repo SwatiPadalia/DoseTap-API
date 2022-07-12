@@ -131,9 +131,10 @@ export const syncData = async (req, res) => {
 
     if (deviceMapping.length > 0) {
       let matched = false;
-      deviceMapping.map((d) => {
-        if (d.patient_id == userId) matched = true;
-      });
+
+      for (const dm in deviceMapping) {
+        if (dm.patient_id == userId) matched = true;
+      }
 
       if (matched) {
         await DeviceUserMapping.update(
