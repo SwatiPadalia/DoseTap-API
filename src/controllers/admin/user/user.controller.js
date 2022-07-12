@@ -21,6 +21,8 @@ const randomstring = require("randomstring");
 const template = require("../../../mail/mailTemplate");
 const mailSender = require("../../../mail/sendEmail");
 
+const _ = require("lodash");
+
 export const create = async (req, res) => {
   try {
     let patient, doctor;
@@ -595,6 +597,10 @@ export const patientUnderDoctor = async (req, res) => {
       limit,
     });
 
+    user_caretaker.rows = _.uniqBy(user_caretaker.rows, function (e) {
+      return e.patient_id;
+    });
+
     let rows = await Promise.all(
       user_caretaker.rows.flatMap(async (u) => {
         let adherence_open = await Adherence.findAndCountAll({
@@ -613,7 +619,7 @@ export const patientUnderDoctor = async (req, res) => {
         let total = adherence_open.count + adherence_missed.count;
 
         let y = adherence_open.count / total;
-        let adherence = y ? y * 100 : 0;
+        let adherence = y ? (y * 100).toFixed(2) : 0;
         return {
           ...u.get({ plain: true }),
           patient: {
