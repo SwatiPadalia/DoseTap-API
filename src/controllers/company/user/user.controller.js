@@ -366,8 +366,13 @@ export const patientUnderDoctor = async (req, res) => {
       offset: (page - 1) * limit,
       limit,
     });
+    console.log(
+      "🚀 ~ file: user.controller.js ~ line 369 ~ patientUnderDoctor ~ user_caretaker",
+      user_caretaker
+    );
 
     user_caretaker.rows = _.uniqBy(user_caretaker.rows, function (e) {
+      console.log("🚀 ~ file: user.controller.js ~ line 374 ~ e", e.patient_id);
       return e.patient_id;
     });
 
@@ -405,7 +410,7 @@ export const patientUnderDoctor = async (req, res) => {
       users: {
         ...user_caretaker,
         currentPage: parseInt(page),
-        totalPage: Math.ceil(user_caretaker.count / limit),
+        totalPage: Math.ceil(user_caretaker.rows.length / limit),
       },
     });
   } catch (error) {
