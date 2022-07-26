@@ -127,14 +127,26 @@ export const syncData = async (req, res) => {
         device_id: device.id,
         company_id: deviceCompanyMapping.company_id,
       },
+      raw: true,
     });
+    console.log(
+      "🚀 ~ file: user.controller.js ~ line 131 ~ syncData ~ deviceMapping",
+      deviceMapping
+    );
 
     if (deviceMapping.length > 0) {
       let matched = false;
 
-      for (const dm in deviceMapping) {
-        if (dm.patient_id == userId) matched = true;
+      for (let i = 0; i < deviceMapping.length; i++) {
+        console.log("dm.patient_id", deviceMapping[i].patient_id);
+        console.log("userId", userId);
+        if (deviceMapping[i].patient_id == userId) matched = true;
       }
+
+      console.log(
+        "🚀 ~ file: user.controller.js ~ line 135 ~ syncData ~ matched",
+        matched
+      );
 
       if (matched) {
         await DeviceUserMapping.update(
