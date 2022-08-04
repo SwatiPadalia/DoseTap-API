@@ -117,6 +117,7 @@ export const syncData = async (req, res) => {
       where: {
         device_id: device.id,
       },
+      order: [["createdAt", "DESC"]],
     });
 
     if (!deviceCompanyMapping)
