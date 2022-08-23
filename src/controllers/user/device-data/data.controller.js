@@ -1,11 +1,26 @@
 import { errorResponse, successResponse } from '../../../helpers';
-import { Adherence, DeviceUserMapping } from '../../../models';
+import { Adherence, DeviceUserMapping, UserCareTakerMappings } from '../../../models';
 const { Op } = require('sequelize')
 const moment = require('moment');
 
 export const tracker = async (req, res) => {
     try {
-        const { userId } = req.user;
+        const { role } = req.user;
+        
+        let userId = req.user.userId;
+
+        if (role == "caretaker") {
+          let userCareTakerMapping = await UserCareTakerMappings.findOne({
+            where: {
+              caretaker_id: userId,
+            },
+          });
+          
+          userId = userCareTakerMapping.patient_id;
+        } 
+
+        console.log('"🚀 ~ file: data.controller.js ~ line 22 ~ userId ~ userId', userId)
+
         const { date } = req.body;
 
         let morning = 'NOT AVAILABLE';
