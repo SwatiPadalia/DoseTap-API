@@ -242,7 +242,20 @@ export const tracker = async (req, res) => {
 
 export const report = async (req, res) => {
     try {
-        const { userId } = req.user;
+        
+        const { role } = req.user;
+        
+        let userId = req.user.userId;
+
+        if (role == "caretaker") {
+          let userCareTakerMapping = await UserCareTakerMappings.findOne({
+            where: {
+              caretaker_id: userId,
+            },
+          });
+          
+          userId = userCareTakerMapping.patient_id;
+        } 
 
         const { fromDate, toDate } = req.body;
 
