@@ -8,10 +8,20 @@ export const create = async (req, res) => {
         const {
             data
         } = req.body;
+
+        const { userId } = req.user;
+        const user_caretaker = await UserCareTakerMappings.findOne({
+            where: {
+                caretaker_id: userId
+            }
+        })
+        const user_id = user_caretaker.patient_id
+
+
         for (const slot of data) {
             const where = {
                 slot_id: slot.slot_id,
-                user_id: slot.user_id
+                user_id: user_id
             }
             await updateOrCreate(CareTakerUserSlot, where, slot);
         }
@@ -31,12 +41,14 @@ export const all = async (req, res) => {
             }
         })
         const user_id = user_caretaker.patient_id
+        console.log("🚀 ~ file: user-slot.controller.js ~ line 34 ~ all ~ user_id", user_id)
         let user_slot = await CareTakerUserSlot.findAll({
             where: {
                 user_id
             },
             include: [{ model: Slot, as: 'slots' }]
         })
+        console.log("🚀 ~ file: user-slot.controller.js ~ line 41 ~ all ~ user_slot", user_slot)
 
         if (user_slot.length == 0) {
             const slotsData = await Slot.findAll({
