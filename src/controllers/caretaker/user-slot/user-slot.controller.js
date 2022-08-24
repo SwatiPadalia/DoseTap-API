@@ -23,6 +23,7 @@ export const create = async (req, res) => {
                 slot_id: slot.slot_id,
                 user_id: user_id
             }
+            slot.user_id = user_id
             await updateOrCreate(CareTakerUserSlot, where, slot);
         }
         return successResponse(req, res, {});
