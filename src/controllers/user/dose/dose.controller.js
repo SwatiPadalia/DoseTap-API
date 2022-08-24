@@ -82,7 +82,19 @@ export const deleteScheduledDose = async (req, res) => {
 export const all = async (req, res) => {
 
   try {
-    const { userId: patient_id } = req.user;
+    const { userId } = req.user;
+
+    if (req.user.role == "caretaker") {
+      const user_caretaker = await UserCareTakerMappings.findOne({
+        where: {
+          caretaker_id: userId,
+        },
+      });
+      patient_id = user_caretaker.patient_id;
+    } else {
+      patient_id = userId;
+    }
+
     const doses = await ScheduleDose.findAll({
       where: {
         patient_id
