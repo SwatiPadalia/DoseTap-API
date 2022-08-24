@@ -83,7 +83,7 @@ export const all = async (req, res) => {
 
   try {
     const { userId } = req.user;
-
+    let patient_id = userId;
     if (req.user.role == "caretaker") {
       const user_caretaker = await UserCareTakerMappings.findOne({
         where: {
@@ -91,8 +91,6 @@ export const all = async (req, res) => {
         },
       });
       patient_id = user_caretaker.patient_id;
-    } else {
-      patient_id = userId;
     }
 
     const doses = await ScheduleDose.findAll({
