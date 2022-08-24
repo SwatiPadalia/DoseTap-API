@@ -1,6 +1,6 @@
 import { errorResponse, successResponse } from '../../../helpers';
 const { Op } = require('sequelize');
-const { ScheduleDose, Medicine, User, CareTakerScheduleDose, CareTakerUserSlot, Slot, UserSlot, UserAlarm } = require('../../../models');
+const { ScheduleDose, Medicine, User, CareTakerScheduleDose, CareTakerUserSlot, Slot, UserSlot, UserAlarm, UserCareTakerMappings } = require('../../../models');
 
 
 export const scheduleDose = async (req, res) => {
