@@ -104,7 +104,7 @@ export const all = async (req, res) => {
     })
     const patient_id = user_caretaker.patient_id
     console.log("🚀 ~ file: dose.controller.js ~ line 105 ~ all ~ patient_id", patient_id)
-    const doses = await ScheduleDose.findAll({
+    const doses = await CareTakerScheduleDose.findAll({
       where: {
         patient_id
       },
