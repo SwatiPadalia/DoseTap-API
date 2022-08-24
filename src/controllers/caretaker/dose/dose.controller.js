@@ -1,6 +1,6 @@
 import { errorResponse, successResponse } from '../../../helpers';
 const { Op } = require('sequelize');
-const { CareTakerScheduleDose, Medicine, User, UserCareTakerMappings } = require('../../../models');
+const { CareTakerScheduleDose, ScheduleDose, Medicine, User, UserCareTakerMappings } = require('../../../models');
 
 
 export const scheduleDose = async (req, res) => {
@@ -104,7 +104,7 @@ export const all = async (req, res) => {
     })
     const patient_id = user_caretaker.patient_id
     console.log("🚀 ~ file: dose.controller.js ~ line 105 ~ all ~ patient_id", patient_id)
-    const doses = await CareTakerScheduleDose.findAll({
+    const doses = await ScheduleDose.findAll({
       where: {
         patient_id
       },
