@@ -1,14 +1,21 @@
-import { errorResponse, successResponse } from "../helpers";
-import { states } from "../helpers/IndianStatesDistricts.json";
-import mailSender from "../mail/sendEmail";
+import jwt from 'jsonwebtoken';
+import { errorResponse, successResponse } from "../../helpers";
+import { states } from "../../helpers/IndianStatesDistricts.json";
+import mailSender from "../../mail/sendEmail";
 import {
   Adherence,
   DeviceUserMapping,
   Medicine,
   ScheduleDose,
-} from "../models";
+  User
+} from "../../models";
 const { Op } = require("sequelize");
 const sequelize = require("sequelize");
+const otpGenerator = require('otp-generator');
+const otpTool = require("otp-without-db");
+const otpHashKey = process.env.SECRET;
+
+const msg91AuthKey = process.env.MSG91AUTHKEY;
 
 export const getStates = async (req, res) => {
   try {
@@ -268,3 +275,62 @@ export const medicineAdherenceData = async (req, res) => {
     return errorResponse(req, res, error.message);
   }
 };
+
+
+export const sendOTP = async (req, res) => {
+  try {
+    const { phone } = req.body;
+    let user = await User.findOne({
+      where: {
+        phone,
+      },
+    });
+    if (user) {
+      const otp = otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
+      let hash = otpTool.createNewOTP(phone, otp, otpHashKey);
+      return successResponse(req, res, { hash, otp })
+
+    }
+    return errorResponse(req, res, "Phone number not found");
+  } catch (error) {
+    return errorResponse(req, res, error.message);
+  }
+}
+
+export const verifyOTP = async (req, res) => {
+  try {
+    const { phone, hash, otp } = req.body;
+    let result = otpTool.verifyOTP(phone, otp, hash, otpHashKey);
+    if (result) {
+      const isUser = await User.findOne({
+        where: {
+          phone
+        }
+      })
+
+      if (!isUser) {
+        return errorResponse(req, res, "User not found with this email address!");
+      }
+
+      const env = process.env.NODE_ENV || 'development';
+
+      let randomToken = jwt.sign(
+        {
+          user: {
+            phone,
+            createdAt: new Date(),
+          },
+        },
+        process.env.SECRET,
+      );
+
+      isUser.resetToken = randomToken;
+      isUser.save();
+      return successResponse(req, res, { message: 'success', token: randomToken })
+    }
+    else
+      return errorResponse(req, res, "invalid OTP");
+  } catch (error) {
+    return errorResponse(req, res, error.message);
+  }
+}

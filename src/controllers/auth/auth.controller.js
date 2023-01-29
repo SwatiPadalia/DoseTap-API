@@ -1,8 +1,8 @@
 import axios from 'axios';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
-import { errorResponse, successResponse, uniqueCode, uniqueId } from '../../helpers';
-import { User, UserAlarm, UserCareTakerMappings, UserDoctorMappings } from '../../models';
+import { errorResponse, successResponse, uniqueCode, uniqueId, updateOrCreate } from '../../helpers';
+import { User, UserAlarm, UserCareTakerMappings, UserDoctorMappings, UserSlot } from '../../models';
 const { Op } = require('sequelize')
 const randomstring = require("randomstring");
 const template = require('../../mail/mailTemplate')
@@ -114,6 +114,55 @@ export const register = async (req, res) => {
             }
             console.log("doctorMappingPayload", doctorMappingPayload)
             const newUserDoctorMapping = await UserDoctorMappings.create(doctorMappingPayload);
+
+            const slotDefaultData = [
+                {
+                    "slot_id": 1,
+                    "user_id": newUser.id,
+                    "time": "05:00"
+                },
+                {
+                    "slot_id": 2,
+                    "user_id": newUser.id,
+                    "time": "09:00"
+                },
+                {
+                    "slot_id": 3,
+                    "user_id": newUser.id,
+                    "time": "12:00"
+                },
+                {
+                    "slot_id": 4,
+                    "user_id": newUser.id,
+                    "time": "13:00"
+                },
+                {
+                    "slot_id": 5,
+                    "user_id": newUser.id,
+                    "time": "15:00"
+                }, {
+                    "slot_id": 6,
+                    "user_id": newUser.id,
+                    "time": "17:00"
+                }
+                , {
+                    "slot_id": 7,
+                    "user_id": newUser.id,
+                    "time": "19:00"
+                },
+                {
+                    "slot_id": 8,
+                    "user_id": newUser.id,
+                    "time": "21:00"
+                }
+            ]
+            for (const slot of slotDefaultData) {
+                const where = {
+                    slot_id: slot.slot_id,
+                    user_id: newUser.id
+                }
+                await updateOrCreate(UserSlot, where, slot);
+            }
         }
 
         const emailParams = {

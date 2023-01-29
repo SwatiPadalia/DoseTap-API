@@ -1,5 +1,5 @@
 import express from 'express';
-import * as commonController from '../controllers/common.controller';
+import * as commonController from '../controllers/common/common.controller';
 const router = express.Router();
 
 
