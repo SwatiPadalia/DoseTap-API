@@ -13,6 +13,17 @@ export const scheduleDose = async (req, res) => {
       days,
       count_morning, count_afternoon, count_evening, count_night } = req.body.data;
 
+    const isMedicineSceduled = await ScheduleDose.findOne({
+      where: {
+        medicine_id,
+        patient_id
+      }
+    })
+
+    if (isMedicineSceduled) {
+      return errorResponse(req, res, 'Medicine already scheduled.');
+    }
+
     const payload = {
       patient_id,
       medicine_id,
