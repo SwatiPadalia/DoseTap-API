@@ -19,6 +19,11 @@ const msg91AuthKey = process.env.MSG91AUTHKEY;
 
 export const getStates = async (req, res) => {
   try {
+    states.sort(function (a, b) {
+      a = a.name.toLowerCase();
+      b = b.name.toLowerCase();
+      return a < b ? -1 : a > b ? 1 : 0;
+    })
     return successResponse(req, res, { states });
   } catch (error) {
     console.log(error);
