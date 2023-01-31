@@ -7,7 +7,7 @@ import {
   DeviceCompanyMappings,
   DeviceUserMapping,
   User,
-  UserDoctorMappings,
+  UserDoctorMappings
 } from "../../models";
 const { Op } = require("sequelize");
 const template = require("../../mail/mailTemplate");
@@ -188,7 +188,7 @@ export const syncData = async (req, res) => {
       if (device_data.length > 0) {
         console.log(" >>>>>>>>>>>", device_data);
         const splitData = device_data.replace(/\s/g, "").split(",");
-        for (let i = 0; i < splitData.length; ) {
+        for (let i = 0; i < splitData.length;) {
           console.log("Loop >>", i);
           console.log("length splitData[i].length >>", splitData[i + 1].length);
           if (splitData[i + 1].length != 12) {
@@ -298,7 +298,7 @@ export const inviteCaretaker = async (req, res) => {
 
     let { firstName, lastName, phone, email } = req.body;
 
-    if (email != undefined) {
+    if (email != undefined && email != "" && email != null) {
       const fromUser = await User.findOne({
         where: {
           id: userId,
