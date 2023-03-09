@@ -45,6 +45,6 @@ export const inviteCaretaker = {
     firstName: Joi.string().required(),
     lastName: Joi.string(),
     phone: Joi.number().required(),
-    email: Joi.string().email(),
+    email: Joi.string().email().min(0).allow('').allow(null),
   },
 };

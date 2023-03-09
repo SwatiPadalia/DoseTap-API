@@ -13,6 +13,17 @@ export const scheduleDose = async (req, res) => {
       days,
       count_morning, count_afternoon, count_evening, count_night } = req.body.data;
 
+    const isMedicineSceduled = await ScheduleDose.findOne({
+      where: {
+        medicine_id,
+        patient_id
+      }
+    })
+
+    if (isMedicineSceduled) {
+      return errorResponse(req, res, 'Medicine already scheduled.');
+    }
+
     const payload = {
       patient_id,
       medicine_id,
@@ -39,8 +50,7 @@ export const updateScheduledDose = async (req, res) => {
     const {
       slot_ids,
       days,
-      count_morning, count_afternoon, count_evening, count_night } = req.body;
-
+      count_morning, count_afternoon, count_evening, count_night } = req.body.data;
     const dose = await ScheduleDose.findOne({ where: { [Op.and]: [{ patient_id }, { id }] } });
     if (!dose)
       throw new Error('Dose do not exist');

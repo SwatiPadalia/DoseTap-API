@@ -2,6 +2,7 @@ import express from 'express';
 import validate from 'express-validation';
 import * as doseController from '../controllers/caretaker/dose/dose.controller';
 import * as doseValidator from '../controllers/caretaker/dose/dose.validator';
+import * as patientController from '../controllers/caretaker/patient/patient.controller';
 import * as userSlotController from '../controllers/caretaker/user-slot/user-slot.controller';
 import * as userSlotValidator from '../controllers/caretaker/user-slot/user-slot.validator';
 import * as slotController from '../controllers/user/slot/slot.controller';
@@ -18,6 +19,7 @@ router.post('/user-slot', validate(userSlotValidator.create), userSlotController
 router.get('/user-slot', userSlotController.all);
 
 router.get('/slots', slotController.all);
+router.get('/tagged-patient', patientController.patientTagedToCaretaker);
 
 
 module.exports = router;
