@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
     companyName: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    code: {
+      type: DataTypes.STRING,
+      allowNull: false,
     }
   }, {});
   Medicine.associate = function (models) {
