@@ -1,4 +1,4 @@
-import { errorResponse, successResponse } from '../../../helpers';
+import { errorResponse, successResponse, updateOrCreate } from '../../../helpers';
 import { Medicine } from '../../../models';
 const { Op } = require('sequelize')
 const sequelize = require('sequelize');
@@ -8,11 +8,11 @@ const csv = require("fast-csv");
 export const create = async (req, res) => {
     try {
         const {
-            name, companyName
+            name, companyName, code
         } = req.body;
         const medicine = await Medicine.findOne({
             where: {
-                [Op.or]: [{ name }, { companyName }]
+                [Op.or]: [{ name }, { companyName }, {code}]
             },
         });
         if (medicine) {
@@ -20,7 +20,7 @@ export const create = async (req, res) => {
         }
 
         const payload = {
-            name, companyName
+            name, companyName, code
         };
 
         const newCompany = await Medicine.create(payload);
@@ -77,12 +77,13 @@ export const findById = async (req, res) => {
 
 export const all = async (req, res) => {
     try {
-        let searchFilter = null, statusFilter = null;
+        let searchFilter = null, statusFilter = null, dateFilter = null;
 
         const sort = req.query.sort || -1;
 
         if (req.query.search) {
             const search = req.query.search;
+
 
             searchFilter = {
                 [Op.or]: [
@@ -91,7 +92,7 @@ export const all = async (req, res) => {
                     ),
                     sequelize.where(
                         sequelize.fn('LOWER', sequelize.col('companyName')), { [Op.like]: `%${search}%` }
-                    )
+                    ),
                 ]
             }
         }
@@ -105,12 +106,19 @@ export const all = async (req, res) => {
             }
         }
 
+        if (req.query.createdAt) {
+            const query = req.query.createdAt;
+            dateFilter = sequelize.where(
+                sequelize.fn('LOWER', sequelize.col('createdAt')), { [Op.like]: `%${query}%` }
+            )
+        }
+
         const page = req.query.page || 1;
         const limit = 10;
         const sortOrder = sort == -1 ? 'ASC' : 'DESC';
         const medicines = await Medicine.findAndCountAll({
             where: {
-                [Op.and]: [statusFilter === null ? undefined : { status: statusFilter }, searchFilter === null ? undefined : { searchFilter }]
+                [Op.and]: [statusFilter === null ? undefined : { status: statusFilter }, searchFilter === null ? undefined : { searchFilter }, dateFilter === null ? undefined : { dateFilter }]
             },
             order: [['name', 'ASC']],
             offset: (page - 1) * limit,
@@ -175,17 +183,16 @@ export const csvBulkImport = async (req, res) => {
                 console.log("🚀 ~ file: medicine.controller.js ~ line 171 ~ .on ~ row", row)
                 medicines.push(row);
             })
-            .on("end", () => {
-                Medicine.bulkCreate(medicines)
-                    .then(() => {
-                        fs.unlink(path, function () {
-                            // file deleted
-                        });
-                        return successResponse(req, res, {});
-                    })
-                    .catch((error) => {
-                        return errorResponse(req, res, "Fail to import data into database!");
-                    });
+            .on("end", async () => {
+                for (const medicine of medicines) {
+                    console.log("🚀 ~ file: medicine.controller.js:188 ~ .on ~ medicine:", medicine)
+                    const where = {
+                        code: medicine.code,
+                    }
+                    await updateOrCreate(Medicine, where, medicine);
+                }
+                return successResponse(req, res, {});
+
             });
     } catch (error) {
         console.log(error);

@@ -6,6 +6,7 @@ import {
   uniqueId,
 } from "../../../helpers";
 import {
+  Device,
   Adherence,
   Company,
   DeviceUserMapping,
@@ -81,7 +82,7 @@ export const create = async (req, res) => {
     }
     const reqPass = crypto.createHash("md5").update(password).digest("hex");
 
-    const code = uniqueCode("lowercase", 4, 4, randomstring.generate(10));
+    const code =  reference_code || uniqueCode("lowercase", 4, 4, randomstring.generate(10));
 
     let payload = {
       email,
@@ -94,7 +95,6 @@ export const create = async (req, res) => {
       role,
       reference_code: role == "user" || role == "doctor" ? code : null,
       gender,
-      dob,
       phone,
       city,
       state,
@@ -406,9 +406,45 @@ export const all = async (req, res) => {
           let y = adherence_open.count / total;
           let adherence = y ? y * 100 : 0;
           return { ...u.get({ plain: true }), adherence };
-        })
+        }),
       );
       users.rows = rows;
+
+
+      let deviceInfo = await Promise.all(
+        users.rows.flatMap(async (u) => {
+          console.log("🚀 ~ file: user.controller.js:445 ~ users.rows.flatMap ~ u:", u)
+          const deviceMappings = await DeviceUserMapping.findAll({
+            where: { 
+              patient_id: u.id       
+            },
+            include: [
+              {
+                model: User,
+                as: "doctor",
+              },
+              {
+                model: User,
+                as: "patient",
+              },
+              {
+                model: Device,
+                as: "device",
+              },
+              {
+                model: Company,
+                as: "company",
+              },
+            ],
+            order: [["id", sortOrder]],
+            offset: (page - 1) * limit,
+            limit,
+          });
+          return { ...u, deviceMappings };
+        }),
+      );
+      users.rows = deviceInfo;
+
     }
 
     if (role == "doctor") {

@@ -16,6 +16,8 @@ import * as slotValidator from "../controllers/admin/slot/slot.validator";
 import * as userController from "../controllers/admin/user/user.controller";
 import * as userValidator from "../controllers/admin/user/user.validator";
 import uploadMiddleware from "../middleware/upload";
+import * as referenceCodeValidator from "../controllers/admin/reference-codes/reference-code.validator";
+import * as referenceCodeController from "../controllers/admin/reference-codes/reference-codes.controller";
 
 const router = express.Router();
 
@@ -119,4 +121,12 @@ router.get("/adherence", adherenceController.adherenceData);
 
 router.get("/doctor/:id/patients", userController.patientUnderDoctor);
 
+router.post(
+  "/reference-codes",
+  validate(referenceCodeValidator.create),
+  referenceCodeController.create
+);
+
+router.get("/reference-codes", referenceCodeController.all);
+router.put("/reference-codes/:id/status", referenceCodeController.statusUpdate);
 module.exports = router;
