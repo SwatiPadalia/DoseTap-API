@@ -14,8 +14,8 @@ const sequelize = require("sequelize");
 const otpGenerator = require('otp-generator');
 const otpTool = require("otp-without-db");
 const otpHashKey = process.env.SECRET;
-
-const msg91AuthKey = process.env.MSG91AUTHKEY;
+const axios = require('axios');
+const FactorAPIKey = process.env.FACTOR_API_KEY
 
 export const getStates = async (req, res) => {
   try {
@@ -293,6 +293,23 @@ export const sendOTP = async (req, res) => {
     if (user) {
       const otp = otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
       let hash = otpTool.createNewOTP(phone, otp, otpHashKey);
+
+      var config = {
+        method: 'GET',
+        maxBodyLength: Infinity,
+        url: `https://2factor.in/API/V1/${FactorAPIKey}/SMS/+91${phone}/${otp}/OTP1`,
+        headers: {}
+      };
+
+      axios(config)
+        .then(function (response) {
+          console.log(JSON.stringify(response.data));
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+
+
       return successResponse(req, res, { hash, otp })
 
     }
