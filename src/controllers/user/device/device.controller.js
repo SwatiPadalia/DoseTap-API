@@ -61,18 +61,27 @@ export const otaUpdate = async (req, res) => {
       order: [["id", "DESC"]],
     });
 
+    if (!firmware) {
+      return successResponse(req, res, {
+        userFirmwareVersion: deviceMappings.device.firmwareVersion,
+        lastestFirmwareVersion: deviceMappings.device.firmwareVersion,
+        otpUpdate: false,
+        fileUrl: "",
+      });
+    }
+
     let otpUpdate = false;
 
     const userFirmWareVersion = +deviceMappings.device.firmwareVersion
       .split(".")
       .join("");
-    const lastestFirnwareVersion = +firmware.version.split(".").join("");
+    const lastestFirmwareVersion = +firmware.version.split(".").join("");
 
-    if (userFirmWareVersion < lastestFirnwareVersion) otpUpdate = true;
+    if (userFirmWareVersion < lastestFirmwareVersion) otpUpdate = true;
 
     return successResponse(req, res, {
-      userFirmWareVersion: deviceMappings.device.firmwareVersion,
-      lastestFirnwareVersion: firmware.version,
+      userFirmwareVersion: deviceMappings.device.firmwareVersion,
+      lastestFirmwareVersion: firmware.version,
       otpUpdate,
       fileUrl: firmware.fileUrl,
     });
