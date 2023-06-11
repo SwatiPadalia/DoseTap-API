@@ -129,8 +129,8 @@ export const fileUpload = (req, res) => {
     bb.on('file', (name, file, info) => {
         const { filename, encoding, mimeType } = info;
         console.log("🚀 ~ file: feed.controller.js ~ line 131 ~ bb.on ~ mimeType", mimeType)
-        if (mimeType != 'image/png' && mimeType != 'image/jpg' && mimeType != 'image/jpeg') {
-            return errorResponse(req, res, "png/jpg/jpeg only allowed");
+        if (mimeType != 'image/png' && mimeType != 'image/jpg' && mimeType != 'image/jpeg' && mimeType != 'application/zip') {
+            return errorResponse(req, res, "png/jpg/jpeg/zip only allowed");
         }
         fName = filename.replace(/ /g, "_");
         fType = mimeType;

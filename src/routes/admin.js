@@ -18,7 +18,8 @@ import * as userValidator from "../controllers/admin/user/user.validator";
 import uploadMiddleware from "../middleware/upload";
 import * as referenceCodeValidator from "../controllers/admin/reference-codes/reference-code.validator";
 import * as referenceCodeController from "../controllers/admin/reference-codes/reference-codes.controller";
-
+import * as firmwareController from "../controllers/admin/firmware/firmware.controller";
+import * as firmwareValidator from "../controllers/admin/firmware/firmware.validator";
 const router = express.Router();
 
 //= ===============================
@@ -129,4 +130,13 @@ router.post(
 
 router.get("/reference-codes", referenceCodeController.all);
 router.put("/reference-codes/:id/status", referenceCodeController.statusUpdate);
+
+
+//Firmware
+
+router.get("/firmware", firmwareController.all);
+router.get("/firmware/:id", firmwareController.findById);
+router.post("/firmware", validate(firmwareValidator.create), firmwareController.create);
+router.put("/firmware/:id", validate(firmwareValidator.update), firmwareController.update);
+router.put("/firmware/:id/status", firmwareController.statusUpdate);
 module.exports = router;

@@ -1,65 +1,96 @@
-import express from 'express';
-import validate from 'express-validation';
-import * as alarmController from '../controllers/user/alarm/alarm.controller';
-import * as alarmValidator from '../controllers/user/alarm/alarm.validator';
-import * as userDeviceDataController from '../controllers/user/device-data/data.controller';
-import * as deviceController from '../controllers/user/device/device.controller';
-import * as doseController from '../controllers/user/dose/dose.controller';
-import * as doseValidator from '../controllers/user/dose/dose.validator';
+import express from "express";
+import validate from "express-validation";
+import * as alarmController from "../controllers/user/alarm/alarm.controller";
+import * as alarmValidator from "../controllers/user/alarm/alarm.validator";
+import * as userDeviceDataController from "../controllers/user/device-data/data.controller";
+import * as deviceController from "../controllers/user/device/device.controller";
+import * as doseController from "../controllers/user/dose/dose.controller";
+import * as doseValidator from "../controllers/user/dose/dose.validator";
 import * as feedController from "../controllers/user/feed/feed.controller";
-import * as medicineController from '../controllers/user/medicine/medicine.controller';
-import * as medicineValidator from '../controllers/user/medicine/medicine.validator';
-import * as slotController from '../controllers/user/slot/slot.controller';
-import * as userSlotController from '../controllers/user/user-slot/user-slot.controller';
-import * as userSlotValidator from '../controllers/user/user-slot/user-slot.validator';
-import * as userController from '../controllers/user/user.controller';
-import * as userValidator from '../controllers/user/user.validator';
+import * as medicineController from "../controllers/user/medicine/medicine.controller";
+import * as medicineValidator from "../controllers/user/medicine/medicine.validator";
+import * as slotController from "../controllers/user/slot/slot.controller";
+import * as userSlotController from "../controllers/user/user-slot/user-slot.controller";
+import * as userSlotValidator from "../controllers/user/user-slot/user-slot.validator";
+import * as userController from "../controllers/user/user.controller";
+import * as userValidator from "../controllers/user/user.validator";
 
 const router = express.Router();
 
 //= ===============================
 // API routes
 //= ===============================
-router.get('/me', userController.profile);
-router.post('/me', validate(userValidator.update), userController.update);
+router.get("/me", userController.profile);
+router.post("/me", validate(userValidator.update), userController.update);
 router.post(
-  '/changePassword',
+  "/changePassword",
   validate(userValidator.changePassword),
-  userController.changePassword,
+  userController.changePassword
 );
 
-router.get('/medicines', medicineController.all);
-router.get('/medicine/:id', medicineController.findById);
-router.post('/medicine', validate(medicineValidator.create), medicineController.create);
-router.put('/medicine/:id', validate(medicineValidator.update), medicineController.update);
-router.put('/medicine/:id/status', medicineController.statusUpdate);
+router.get("/medicines", medicineController.all);
+router.get("/medicine/:id", medicineController.findById);
+router.post(
+  "/medicine",
+  validate(medicineValidator.create),
+  medicineController.create
+);
+router.put(
+  "/medicine/:id",
+  validate(medicineValidator.update),
+  medicineController.update
+);
+router.put("/medicine/:id/status", medicineController.statusUpdate);
 
-router.post('/schedule', validate(doseValidator.scheduleDoses), doseController.scheduleDose);
-router.put('/schedule/:id', validate(doseValidator.updateDoses), doseController.updateScheduledDose);
-router.delete('/schedule/:id', doseController.deleteScheduledDose);
-router.get('/schedule/', doseController.all);
+router.post(
+  "/schedule",
+  validate(doseValidator.scheduleDoses),
+  doseController.scheduleDose
+);
+router.put(
+  "/schedule/:id",
+  validate(doseValidator.updateDoses),
+  doseController.updateScheduledDose
+);
+router.delete("/schedule/:id", doseController.deleteScheduledDose);
+router.get("/schedule/", doseController.all);
 
-router.post('/user-slot', validate(userSlotValidator.create), userSlotController.create);
-router.get('/user-slot', userSlotController.all);
+router.post(
+  "/user-slot",
+  validate(userSlotValidator.create),
+  userSlotController.create
+);
+router.get("/user-slot", userSlotController.all);
 
-router.get('/slots', slotController.all);
+router.get("/slots", slotController.all);
 
-router.get('/feeds', feedController.all);
+router.get("/feeds", feedController.all);
 
-router.post('/alarm', validate(alarmValidator.createOrUpdate), alarmController.createOrUpdate);
-router.get('/alarm', alarmController.get);
+router.post(
+  "/alarm",
+  validate(alarmValidator.createOrUpdate),
+  alarmController.createOrUpdate
+);
+router.get("/alarm", alarmController.get);
 
-router.post('/sync', validate(userValidator.sync), userController.syncData);
+router.post("/sync", validate(userValidator.sync), userController.syncData);
 
+router.get("/caretaker-schedule", doseController.getCareTakerSchedule);
+router.post(
+  "/caretaker-schedule",
+  validate(doseValidator.acceptReject),
+  doseController.acceptRejectCareTakerSchedule
+);
 
-router.get('/caretaker-schedule', doseController.getCareTakerSchedule)
-router.post('/caretaker-schedule', validate(doseValidator.acceptReject), doseController.acceptRejectCareTakerSchedule)
+router.post(
+  "/invite-caretaker",
+  validate(userValidator.inviteCaretaker),
+  userController.inviteCaretaker
+);
 
+router.post("/device/reset", deviceController.resetDevice);
+router.get("/device/ota-update", deviceController.otaUpdate);
 
-router.post('/invite-caretaker', validate(userValidator.inviteCaretaker), userController.inviteCaretaker)
-
-router.post('/device/reset', deviceController.resetDevice)
-
-router.post('/tracker', userDeviceDataController.tracker);
-router.post('/report', userDeviceDataController.report);
+router.post("/tracker", userDeviceDataController.tracker);
+router.post("/report", userDeviceDataController.report);
 module.exports = router;
