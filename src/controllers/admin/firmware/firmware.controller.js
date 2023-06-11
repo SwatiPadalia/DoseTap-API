@@ -32,7 +32,7 @@ export const create = async (req, res) => {
 export const update = async (req, res) => {
   try {
     const id = req.params.id;
-    const { version } = req.body;
+    const { version, fileUrl } = req.body;
 
     const firmware = await Firmwares.findOne({
       where: {
@@ -55,6 +55,7 @@ export const update = async (req, res) => {
 
     const payload = {
       version,
+      fileUrl
     };
 
     const updatedFirmare = await Firmwares.update(payload, { where: { id } });

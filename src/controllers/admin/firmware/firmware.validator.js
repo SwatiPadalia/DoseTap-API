@@ -10,5 +10,6 @@ export const create = {
 export const update = {
   body: {
     version: Joi.string().regex(new RegExp(versionPatternExp)).required(),
+    fileUrl: Joi.string().uri().required(),
   },
 };
