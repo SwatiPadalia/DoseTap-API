@@ -4,6 +4,7 @@ export const create = {
   body: {
     version: Joi.string().regex(new RegExp(versionPatternExp)).required(),
     fileUrl: Joi.string().uri().required(),
+    remark: Joi.string().required(),
   },
 };
 
@@ -11,5 +12,6 @@ export const update = {
   body: {
     version: Joi.string().regex(new RegExp(versionPatternExp)).required(),
     fileUrl: Joi.string().uri().required(),
+    remark: Joi.string().required(),
   },
 };

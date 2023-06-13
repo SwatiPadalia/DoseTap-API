@@ -5,11 +5,12 @@ const sequelize = require("sequelize");
 
 export const create = async (req, res) => {
   try {
-    const { version, fileUrl } = req.body;
+    const { version, fileUrl, remark } = req.body;
 
     const payload = {
       version,
       fileUrl,
+      remark
     };
 
     const firmwareWithVersionNameExist = await Firmwares.findOne({
@@ -32,7 +33,7 @@ export const create = async (req, res) => {
 export const update = async (req, res) => {
   try {
     const id = req.params.id;
-    const { version, fileUrl } = req.body;
+    const { version, fileUrl, remark } = req.body;
 
     const firmware = await Firmwares.findOne({
       where: {
@@ -55,7 +56,8 @@ export const update = async (req, res) => {
 
     const payload = {
       version,
-      fileUrl
+      fileUrl,
+      remark
     };
 
     const updatedFirmare = await Firmwares.update(payload, { where: { id } });
