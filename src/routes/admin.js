@@ -37,6 +37,7 @@ router.put(
 );
 router.put("/user/:id/status", userController.statusUpdate);
 router.get("/user/:id/doses", userController.doses);
+router.get("/user/:id/adherence", userController.medicineAdherenceDataPerUser);
 
 // Device
 

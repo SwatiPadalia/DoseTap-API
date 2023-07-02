@@ -6,9 +6,9 @@ import {
   uniqueId,
 } from "../../../helpers";
 import {
-  Device,
   Adherence,
   Company,
+  Device,
   DeviceUserMapping,
   Medicine,
   ScheduleDose,
@@ -82,7 +82,9 @@ export const create = async (req, res) => {
     }
     const reqPass = crypto.createHash("md5").update(password).digest("hex");
 
-    const code =  reference_code || uniqueCode("lowercase", 4, 4, randomstring.generate(10));
+    const code =
+      reference_code ||
+      uniqueCode("lowercase", 4, 4, randomstring.generate(10));
 
     let payload = {
       email,
@@ -406,17 +408,19 @@ export const all = async (req, res) => {
           let y = adherence_open.count / total;
           let adherence = y ? y * 100 : 0;
           return { ...u.get({ plain: true }), adherence };
-        }),
+        })
       );
       users.rows = rows;
 
-
       let deviceInfo = await Promise.all(
         users.rows.flatMap(async (u) => {
-          console.log("🚀 ~ file: user.controller.js:445 ~ users.rows.flatMap ~ u:", u)
+          console.log(
+            "🚀 ~ file: user.controller.js:445 ~ users.rows.flatMap ~ u:",
+            u
+          );
           const deviceMappings = await DeviceUserMapping.findAll({
-            where: { 
-              patient_id: u.id       
+            where: {
+              patient_id: u.id,
             },
             include: [
               {
@@ -441,10 +445,9 @@ export const all = async (req, res) => {
             limit,
           });
           return { ...u, deviceMappings };
-        }),
+        })
       );
       users.rows = deviceInfo;
-
     }
 
     if (role == "doctor") {
@@ -698,6 +701,70 @@ export const doses = async (req, res) => {
       },
     });
     return successResponse(req, res, { data });
+  } catch (error) {
+    return errorResponse(req, res, error.message);
+  }
+};
+
+export const medicineAdherenceDataPerUser = async (req, res) => {
+  try {
+    const patient_id = req.params.id;
+
+    const scheduledMedicines = await ScheduleDose.findAll({
+      where: {
+        patient_id,
+      },
+
+      include: {
+        model: Medicine,
+        as: "medicineDetails",
+      },
+    });
+   
+    const total_adherence_open = await Adherence.findAndCountAll({
+      where: {
+        [Op.and]: [{ status: "open" }, { patient_id: patient_id }],
+      },
+    });
+   
+    const total_adherence_missed = await Adherence.findAndCountAll({
+      where: {
+        [Op.and]: [{ status: "missed" }, { patient_id: patient_id }],
+      },
+    });
+
+    const result = [];
+
+    for (let i = 0; i < scheduledMedicines.length; i++) {
+      let totalOpen = 0;
+      let totalMissed = 0;
+      const slotIds = scheduledMedicines[i].slot_ids;
+      
+
+      total_adherence_open.rows.map((ao) => {
+        if (slotIds.includes(ao.slot_id)) {
+          totalOpen++;
+        }
+      });
+
+      total_adherence_missed.rows.map((ao) => {
+        if (slotIds.includes(ao.slot_id)) {
+          totalMissed++;
+        }
+      });
+
+      result.push({
+        totalOpen,
+        totalMissed,
+        medicineId: scheduledMedicines[0].medicine_id,
+        medicineName: scheduledMedicines[0].medicineDetails.name,
+        companyName: scheduledMedicines[0].medicineDetails.companyName,
+      });
+    }
+
+    return successResponse(req, res, {
+      medicines: result,
+    });
   } catch (error) {
     return errorResponse(req, res, error.message);
   }
