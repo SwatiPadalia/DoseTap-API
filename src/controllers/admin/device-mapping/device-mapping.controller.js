@@ -88,74 +88,67 @@ export const completeMapping = async (req, res) => {
     console.log("hey");
     const sort = req.query.sort || -1;
 
-    if (true) {
-      const search = req.query.search;
-      console.log(
-        "🚀 ~ file: device-mapping.controller.js ~ line 93 ~ completeMapping ~ search",
-        search
-      );
-      searchDeviceFilter = {
-        [Op.or]: [
-          sequelize.where(
-            sequelize.fn("LOWER", sequelize.col("device.serialNumber")),
-            { [Op.like]: `%${search}%` }
-          ),
-        ],
-      };
+    const searchCompany = req.query.searchCompany;
+    const searchDoctor = req.query.searchDoctor;
+    const searchPatient = req.query.searchPatient;
+    const searchDevice = req.query.searchDevice;
+    console.log("🚀 ~ file: device-mapping.controller.js:95 ~ completeMapping ~ searchDevice:", searchDevice)
+   
+    if(searchDevice)
+    searchDeviceFilter = {
+      [Op.or]: [
+        sequelize.where(
+          sequelize.fn("LOWER", sequelize.col("device.serialNumber")),
+          { [Op.like]: `%${searchDevice.replace('+', ' ')}%` }
+        ),
+      ],
+    };
+    if(searchCompany)
+    searchCompanyFilter = {
+      [Op.or]: [
+        sequelize.where(sequelize.fn("LOWER", sequelize.col("company.name")), {
+          [Op.like]: `%${searchCompany.replace('+', ' ')}%`,
+        }),
+      ],
+    };
+    if(searchDoctor)
+    searchDoctorFilter = {
+      [Op.or]: [
+        sequelize.where(
+          sequelize.fn("LOWER", sequelize.col("doctor.firstName")),
+          {
+            [Op.like]: `%${searchDoctor.replace('+', ' ')}%`,
+          }
+        ),
+      ],
+    };
+    if(searchPatient)
+    searchPatientFilter = {
+      [Op.or]: [
+        sequelize.where(
+          sequelize.fn("LOWER", sequelize.col("patient.firstName")),
+          {
+            [Op.like]: `%${searchPatient.replace('+', ' ')}%`,
+          }
+        ),
+      ],
+    };
 
-      searchCompanyFilter = {
-        [Op.or]: [
-          sequelize.where(
-            sequelize.fn("LOWER", sequelize.col("company.name")),
-            {
-              [Op.like]: `%${search}%`,
-            }
-          ),
-        ],
-      };
-
-      searchDoctorFilter = {
-        [Op.or]: [
-          sequelize.where(
-            sequelize.fn("LOWER", sequelize.col("doctor.firstName")),
-            {
-              [Op.like]: `%${search}%`,
-            }
-          ),
-        ],
-      };
-      searchPatientFilter = {
-        [Op.or]: [
-          sequelize.where(
-            sequelize.fn("LOWER", sequelize.col("patient.firstName")),
-            {
-              [Op.like]: `%${search}%`,
-            }
-          ),
-        ],
-      };
-    }
-    
-
-    if (req.query.status) {
-      const status = req.query.status;
-      if (status == 1) {
-        statusFilter = true;
-      } else {
-        statusFilter = false;
-      }
-    }
+    console.log('>>searchDeviceFilter', searchDeviceFilter)
+    console.log('>>searchCompanyFilter', searchCompanyFilter)
+    console.log('>>searchDoctorFilter', searchDoctorFilter)
+    console.log('>>searchPatientFilter', searchPatientFilter)
 
     const page = req.query.page || 1;
     const limit = 10;
     const sortOrder = sort == -1 ? "ASC" : "DESC";
     const deviceMappings = await DeviceUserMapping.findAndCountAll({
       where: {
-        [Op.or]: [
-          searchDeviceFilter === null ? undefined : { searchDeviceFilter },
-          searchCompanyFilter === null ? undefined : { searchCompanyFilter },
-          searchDoctorFilter === null ? undefined : { searchDoctorFilter },
-          searchPatientFilter === null ? undefined : { searchPatientFilter },
+        [Op.and]: [
+          searchDeviceFilter == null ? undefined : { searchDeviceFilter },
+          searchCompanyFilter == null ? undefined : { searchCompanyFilter },
+          searchDoctorFilter == null ? undefined : { searchDoctorFilter },
+          searchPatientFilter == null ? undefined : { searchPatientFilter },
         ],
       },
       include: [
