@@ -1,3 +1,4 @@
+import axios from "axios";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { errorResponse, successResponse } from "../../helpers";
@@ -7,11 +8,12 @@ import {
   DeviceCompanyMappings,
   DeviceUserMapping,
   User,
-  UserDoctorMappings
+  UserDoctorMappings,
 } from "../../models";
 const { Op } = require("sequelize");
 const template = require("../../mail/mailTemplate");
 const mailSender = require("../../mail/sendEmail");
+const FactorAPIKey = process.env.FACTOR_API_KEY
 
 export const profile = async (req, res) => {
   try {
@@ -188,7 +190,7 @@ export const syncData = async (req, res) => {
       if (device_data.length > 0) {
         console.log(" >>>>>>>>>>>", device_data);
         const splitData = device_data.replace(/\s/g, "").split(",");
-        for (let i = 0; i < splitData.length;) {
+        for (let i = 0; i < splitData.length; ) {
           console.log("Loop >>", i);
           console.log("length splitData[i].length >>", splitData[i + 1].length);
           if (splitData[i + 1].length != 12) {
@@ -323,6 +325,28 @@ export const inviteCaretaker = async (req, res) => {
         toEmail: email,
       };
       mailSender.sendMail(params);
+    }
+
+    if (phone) {
+      const formattedPhoneWithoutExtension = phone
+        .replace(/\D/g, "")
+        .slice(-10);
+      console.log("🚀 ~ file: user.controller.js:334 ~ inviteCaretaker ~ formattedPhoneWithoutExtension:", formattedPhoneWithoutExtension)
+
+      // const config = {
+      //   method: "GET",
+      //   maxBodyLength: Infinity,
+      //   url: `https://2factor.in/API/V1/${FactorAPIKey}/SMS/+91${formattedPhoneWithoutExtension}/1234/OTP1`,
+      //   headers: {},
+      // };
+
+      // axios(config)
+      //   .then(function (response) {
+      //     console.log(JSON.stringify(response.data));
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error);
+      //   });
     }
 
     return successResponse(req, res, {});
