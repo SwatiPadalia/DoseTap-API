@@ -13,7 +13,8 @@ import {
 const { Op } = require("sequelize");
 const template = require("../../mail/mailTemplate");
 const mailSender = require("../../mail/sendEmail");
-const FactorAPIKey = process.env.FACTOR_API_KEY
+const FactorAPIKey = process.env.FACTOR_API_KEY;
+const qs = require("qs");
 
 export const profile = async (req, res) => {
   try {
@@ -300,13 +301,13 @@ export const inviteCaretaker = async (req, res) => {
 
     let { firstName, lastName, phone, email } = req.body;
 
-    if (email != undefined && email != "" && email != null) {
-      const fromUser = await User.findOne({
-        where: {
-          id: userId,
-        },
-      });
+    const fromUser = await User.findOne({
+      where: {
+        id: userId,
+      },
+    });
 
+    if (email != undefined && email != "" && email != null) {
       const emailParams = {
         to: firstName + " " + (lastName || ""),
         from: fromUser.firstName + " " + fromUser.lastName,
@@ -331,22 +332,42 @@ export const inviteCaretaker = async (req, res) => {
       const formattedPhoneWithoutExtension = phone
         .replace(/\D/g, "")
         .slice(-10);
-      console.log("🚀 ~ file: user.controller.js:334 ~ inviteCaretaker ~ formattedPhoneWithoutExtension:", formattedPhoneWithoutExtension)
+      console.log(
+        "🚀 ~ file: user.controller.js:334 ~ inviteCaretaker ~ formattedPhoneWithoutExtension:",
+        formattedPhoneWithoutExtension
+      );
 
-      // const config = {
-      //   method: "GET",
-      //   maxBodyLength: Infinity,
-      //   url: `https://2factor.in/API/V1/${FactorAPIKey}/SMS/+91${formattedPhoneWithoutExtension}/1234/OTP1`,
-      //   headers: {},
-      // };
+      const emailParams = {
+        to: firstName + " " + (lastName || ""),
+        from: fromUser.firstName + " " + fromUser.lastName,
+        code: fromUser.reference_code,
+      };
 
-      // axios(config)
-      //   .then(function (response) {
-      //     console.log(JSON.stringify(response.data));
-      //   })
-      //   .catch(function (error) {
-      //     console.log(error);
-      //   });
+      const data = qs.stringify({
+        module: "TRANS_SMS",
+        apikey: `${FactorAPIKey}`,
+        to: `${formattedPhoneWithoutExtension}"`,
+        from: "DOSETP",
+        peid: 1001537681874889271,
+        ctid: 1007263115665060177,
+        msg: `You have been invited to DoseTap by ${emailParams.from}. Please use code ${emailParams.code} to signup as a caregiver on DoseTap mobile app.`,
+      });
+
+      const config = {
+        method: "post",
+        maxBodyLength: Infinity,
+        url: "https://2factor.in/API/R1/",
+        headers: {},
+        data: data,
+      };
+
+      axios(config)
+        .then(function (response) {
+          console.log(JSON.stringify(response.data));
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
     }
 
     return successResponse(req, res, {});
