@@ -38,6 +38,7 @@
     "express-joi-validator": "^2.0.1",
     "express-validation": "^1.0.2",
     "fast-csv": "^4.3.6",
+    "firebase-admin": "^11.10.0",
     "http": "0.0.0",
     "jest": "^24.8.0",
     "joi": "^14.3.1",

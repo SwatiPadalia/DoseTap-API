@@ -2,6 +2,7 @@ import axios from "axios";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { errorResponse, successResponse } from "../../helpers";
+import sendPushNotification from "../../helpers/pushNotification";
 import {
   Adherence,
   Device,
@@ -298,7 +299,6 @@ export const syncData = async (req, res) => {
 export const inviteCaretaker = async (req, res) => {
   try {
     const { userId } = req.user;
-
     let { firstName, lastName, phone, email } = req.body;
 
     const fromUser = await User.findOne({
