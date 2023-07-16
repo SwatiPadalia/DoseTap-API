@@ -69,6 +69,9 @@ module.exports = (sequelize, DataTypes) => {
       appVersion: {
         type: DataTypes.STRING,
       },
+      fcmToken: {
+        type: DataTypes.STRING,
+      },
     },
     {
       defaultScope: {

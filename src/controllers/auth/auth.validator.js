@@ -35,7 +35,8 @@ export const login = {
             .email().when('phone', { is: null, then: Joi.required() }),
         phone: Joi.number().default(null),
         password: Joi.string().required(),
-        role: ""
+        role: "",
+        fcmToken: Joi.string().optional(),
     },
 };
 
