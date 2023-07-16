@@ -2,7 +2,6 @@ import axios from "axios";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { errorResponse, successResponse } from "../../helpers";
-import sendPushNotification from "../../helpers/pushNotification";
 import {
   Adherence,
   Device,
@@ -346,11 +345,13 @@ export const inviteCaretaker = async (req, res) => {
       const data = qs.stringify({
         module: "TRANS_SMS",
         apikey: `${FactorAPIKey}`,
-        to: `${formattedPhoneWithoutExtension}"`,
+        to: `${formattedPhoneWithoutExtension}`,
         from: "DOSETP",
+        templatename: "INVITE_CARETAKER",
+        var1: `${emailParams.from}`,
+        var2: `${emailParams.code}`,
         peid: 1001537681874889271,
         ctid: 1007263115665060177,
-        msg: `You have been invited to DoseTap by ${emailParams.from}. Please use code ${emailParams.code} to signup as a caregiver on DoseTap mobile app.`,
       });
 
       const config = {
