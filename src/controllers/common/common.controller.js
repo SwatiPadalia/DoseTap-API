@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 import { errorResponse, successResponse } from "../../helpers";
 import { states } from "../../helpers/IndianStatesDistricts.json";
 import mailSender from "../../mail/sendEmail";
@@ -7,15 +7,15 @@ import {
   DeviceUserMapping,
   Medicine,
   ScheduleDose,
-  User
+  User,
 } from "../../models";
 const { Op } = require("sequelize");
 const sequelize = require("sequelize");
-const otpGenerator = require('otp-generator');
+const otpGenerator = require("otp-generator");
 const otpTool = require("otp-without-db");
 const otpHashKey = process.env.SECRET;
-const axios = require('axios');
-const FactorAPIKey = process.env.FACTOR_API_KEY
+const axios = require("axios");
+const FactorAPIKey = process.env.FACTOR_API_KEY;
 
 export const getStates = async (req, res) => {
   try {
@@ -23,7 +23,7 @@ export const getStates = async (req, res) => {
       a = a.name.toLowerCase();
       b = b.name.toLowerCase();
       return a < b ? -1 : a > b ? 1 : 0;
-    })
+    });
     return successResponse(req, res, { states });
   } catch (error) {
     console.log(error);
@@ -37,8 +37,9 @@ export const getDoseTapDocuments = async (req, res) => {
       privacy:
         "https://dosetap-document.s3.ap-south-1.amazonaws.com/privacy.pdf",
       terms: "https://dosetap-document.s3.ap-south-1.amazonaws.com/terms.pdf",
-      faq: "https://dosetap-document.s3.ap-south-1.amazonaws.com/terms.pdf",
-      user_manual: "https://dosetap-document.s3.ap-south-1.amazonaws.com/terms.pdf"
+      faq: "https://www.dosetap.com/faq.html",
+      user_manual:
+        "https://dosetap-document.s3.ap-south-1.amazonaws.com/user_manual.pdf",
     };
     return successResponse(req, res, { document });
   } catch (error) {
@@ -281,7 +282,6 @@ export const medicineAdherenceData = async (req, res) => {
   }
 };
 
-
 export const sendOTP = async (req, res) => {
   try {
     const { phone } = req.body;
@@ -291,14 +291,18 @@ export const sendOTP = async (req, res) => {
       },
     });
     if (user) {
-      const otp = otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
+      const otp = otpGenerator.generate(6, {
+        lowerCaseAlphabets: false,
+        upperCaseAlphabets: false,
+        specialChars: false,
+      });
       let hash = otpTool.createNewOTP(phone, otp, otpHashKey);
 
       var config = {
-        method: 'GET',
+        method: "GET",
         maxBodyLength: Infinity,
         url: `https://2factor.in/API/V1/${FactorAPIKey}/SMS/+91${phone}/${otp}/OTP1`,
-        headers: {}
+        headers: {},
       };
 
       axios(config)
@@ -309,15 +313,13 @@ export const sendOTP = async (req, res) => {
           console.log(error);
         });
 
-
-      return successResponse(req, res, { hash, otp })
-
+      return successResponse(req, res, { hash, otp });
     }
     return errorResponse(req, res, "Phone number not found");
   } catch (error) {
     return errorResponse(req, res, error.message);
   }
-}
+};
 
 export const verifyOTP = async (req, res) => {
   try {
@@ -326,15 +328,19 @@ export const verifyOTP = async (req, res) => {
     if (result) {
       const isUser = await User.findOne({
         where: {
-          phone
-        }
-      })
+          phone,
+        },
+      });
 
       if (!isUser) {
-        return errorResponse(req, res, "User not found with this email address!");
+        return errorResponse(
+          req,
+          res,
+          "User not found with this email address!"
+        );
       }
 
-      const env = process.env.NODE_ENV || 'development';
+      const env = process.env.NODE_ENV || "development";
 
       let randomToken = jwt.sign(
         {
@@ -343,16 +349,17 @@ export const verifyOTP = async (req, res) => {
             createdAt: new Date(),
           },
         },
-        process.env.SECRET,
+        process.env.SECRET
       );
 
       isUser.resetToken = randomToken;
       isUser.save();
-      return successResponse(req, res, { message: 'success', token: randomToken })
-    }
-    else
-      return errorResponse(req, res, "invalid OTP");
+      return successResponse(req, res, {
+        message: "success",
+        token: randomToken,
+      });
+    } else return errorResponse(req, res, "invalid OTP");
   } catch (error) {
     return errorResponse(req, res, error.message);
   }
-}
+};
