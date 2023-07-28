@@ -279,8 +279,16 @@ export const syncData = async (req, res) => {
             continue;
           }
 
-          await Adherence.create(payload);
-          i = i + 2;
+          try {
+            await Adherence.create(payload);
+            i = i + 2;
+          } catch (err) {
+            console.log(
+              "🚀 ~ file: user.controller.js:286 ~ syncData ~ err:",
+              err
+            );
+            i = i + 2;
+          }
         }
       }
     }
