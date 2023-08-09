@@ -6,7 +6,7 @@ const sequelize = require('sequelize');
 export const create = async (req, res) => {
     try {
         const {
-            name, description, serialNumber
+            name, description, serialNumber, firmwareVersion
         } = req.body;
         const device = await Device.findOne({
             where: {
@@ -21,6 +21,7 @@ export const create = async (req, res) => {
             name,
             description,
             serialNumber,
+            firmwareVersion
         };
 
         const newDevice = await Device.create(payload);
@@ -34,7 +35,7 @@ export const update = async (req, res) => {
     try {
         const id = req.params.id;
         const {
-            name, description, serialNumber
+            name, description, serialNumber, firmwareVersion
         } = req.body;
 
         const device = await Device.findOne({
@@ -47,7 +48,7 @@ export const update = async (req, res) => {
         }
 
         const payload = {
-            name, description, serialNumber
+            name, description, serialNumber, firmwareVersion
         };
 
         const updatedDevice = await Device.update(payload, { where: { id } });
