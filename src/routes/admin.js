@@ -61,6 +61,7 @@ router.post(
 );
 router.get("/mappings", deviceUserMappingController.partialMapping);
 router.get("/complete-mappings", deviceUserMappingController.completeMapping);
+router.put("/device-mapping/:id/status" , deviceUserMappingController.updateStatusDeviceMapping);
 
 //Company
 router.get("/companies", companyController.all);
