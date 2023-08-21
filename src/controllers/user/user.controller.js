@@ -308,6 +308,9 @@ export const inviteCaretaker = async (req, res) => {
     const { userId } = req.user;
     let { firstName, lastName, phone, email } = req.body;
 
+    const peid= 1001537681874889271;
+    const ctid= 1007263115665060177;
+
     const fromUser = await User.findOne({
       where: {
         id: userId,
@@ -353,13 +356,13 @@ export const inviteCaretaker = async (req, res) => {
       const data = qs.stringify({
         module: "TRANS_SMS",
         apikey: `${FactorAPIKey}`,
+        peid,
+        ctid,
         to: `${formattedPhoneWithoutExtension}`,
         from: "DOSETP",
         templatename: "INVITE_CARETAKER",
         var1: `${emailParams.from}`,
-        var2: `${emailParams.code}`,
-        peid: 1001537681874889271,
-        ctid: 1007263115665060177,
+        var2: `${emailParams.code}`
       });
 
       const config = {
@@ -369,6 +372,7 @@ export const inviteCaretaker = async (req, res) => {
         headers: {},
         data: data,
       };
+      console.log("🚀 ~ file: user.controller.js:372 ~ inviteCaretaker ~ config:", config)
 
       axios(config)
         .then(function (response) {
