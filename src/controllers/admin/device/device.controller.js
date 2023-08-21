@@ -104,7 +104,7 @@ export const findById = async (req, res) => {
 
 export const all = async (req, res) => {
     try {
-        let searchFilter = null, statusFilter = null, companyFilter = null;
+        let searchFilter = null, statusFilter = null;
 
         const sort = req.query.sort || -1;
 
@@ -129,38 +129,19 @@ export const all = async (req, res) => {
             }
         }
 
-        if (req.query.company_id) {
-            const company_id = req.query.company_id;
-            const associated_devices = [
-                ... (await DeviceCompanyMappings.findAll({
-                    where: {
-                        company_id
-                    },
-                    attributes: ['device_id'],
-                    raw: true
-                })),
-            ].map(device => device.device_id);
-
-            companyFilter = {
-                id: {
-                    [Op.in]: associated_devices
-                }
-            }
-        }
-
         const page = req.query.page || 1;
         const limit = 10;
         const sortOrder = sort == -1 ? 'ASC' : 'DESC';
         const devices = await Device.findAndCountAll({
             where: {
-                [Op.and]: [statusFilter === null ? undefined : { status: statusFilter },
+                [Op.and]: [statusFilter === null ? undefined : { "$device_mapping.status$": statusFilter },
                 searchFilter === null ? undefined : { searchFilter },
-                companyFilter === null ? undefined : { ...companyFilter }]
+                (req.query.company_id).trim() === '' ? undefined : { "$device_mapping.company_id$": req.query.company_id }]
             },
             include: [{
                 model: DeviceCompanyMappings, as: 'device_mapping', include: [{
                     model: Company, as: 'company'
-                }]
+                }],
             }],
             order: [['createdAt', 'DESC'], ['id', 'ASC']],
             offset: (page - 1) * limit,
