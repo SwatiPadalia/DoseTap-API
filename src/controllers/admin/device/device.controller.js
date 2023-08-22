@@ -129,6 +129,8 @@ export const all = async (req, res) => {
             }
         }
 
+        console.log('>>>req.query.company_id', req.query.company_id)
+
         const page = req.query.page || 1;
         const limit = 10;
         const sortOrder = sort == -1 ? 'ASC' : 'DESC';
@@ -136,7 +138,7 @@ export const all = async (req, res) => {
             where: {
                 [Op.and]: [statusFilter === null ? undefined : { "$device_mapping.status$": statusFilter },
                 searchFilter === null ? undefined : { searchFilter },
-                (req.query.company_id) === '' ? undefined : { "$device_mapping.company_id$": req.query.company_id }]
+                ((req.query.company_id === undefined) || (req.query.company_id === '' )) ? undefined : { "$device_mapping.company_id$": req.query.company_id }]
             },
             include: [{
                 model: DeviceCompanyMappings, as: 'device_mapping', include: [{
