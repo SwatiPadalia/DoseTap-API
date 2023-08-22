@@ -136,7 +136,7 @@ export const all = async (req, res) => {
             where: {
                 [Op.and]: [statusFilter === null ? undefined : { "$device_mapping.status$": statusFilter },
                 searchFilter === null ? undefined : { searchFilter },
-                (req.query.company_id).trim() === '' ? undefined : { "$device_mapping.company_id$": req.query.company_id }]
+                (req.query.company_id) === '' ? undefined : { "$device_mapping.company_id$": req.query.company_id }]
             },
             include: [{
                 model: DeviceCompanyMappings, as: 'device_mapping', include: [{
