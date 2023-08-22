@@ -171,7 +171,8 @@ export const deviceTagToCompany = async (req, res) => {
 
         const payload = {
             company_id,
-            device_id
+            device_id,
+            status: true
         };
         const checkDeviceCompanyMapping = await DeviceCompanyMappings.findOne({
             where: {
