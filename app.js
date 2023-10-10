@@ -14,6 +14,7 @@ import companyRoutes from './src/routes/company';
 import doctorRoutes from './src/routes/doctor';
 import publicRoutes from './src/routes/public';
 import userRoutes from './src/routes/user';
+const doseReminderCron = require('./src/cron/doseReminder');
 
 
 dotenv.config();
@@ -37,6 +38,7 @@ app.use((req, res, next) => {
   next();
 });
 
+doseReminderCron.initScheduledJobs();
 
 app.use('/api', publicRoutes);
 app.use('/api/common', userMiddleware, commonRoutes);
