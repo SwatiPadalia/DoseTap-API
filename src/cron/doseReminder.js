@@ -9,6 +9,10 @@ export const initScheduledJobs = () => {
   const scheduledJobFunction = CronJob.schedule(
     "00 01 5-21 * * *",
     async () => {
+      if (process.env.NODE_ENV === "development") {
+        console.log("Cron donot run on development");
+        return;
+      }
       const SlotMapper = {
         5: 1,
         9: 2,
