@@ -5,61 +5,69 @@ import { ScheduleDose, User } from "../models";
 const { Op } = require("sequelize");
 const sequelize = require("sequelize");
 
-const SlotMapper = {
-  5: 1,
-  9: 2,
-  12: 3,
-  13: 4,
-  15: 5,
-  17: 6,
-  19: 7,
-  21: 8,
-};
+export const initScheduledJobs = () => {
+  const scheduledJobFunction = CronJob.schedule(
+    "01 01 5-21 * * *",
+    async () => {
+      const SlotMapper = {
+        5: 1,
+        9: 2,
+        12: 3,
+        13: 4,
+        15: 5,
+        17: 6,
+        19: 7,
+        21: 8,
+      };
 
-exports.initScheduledJobs = () => {
-  const scheduledJobFunction = CronJob.schedule("01 01 5-21 * * *", async () => {
-    console.log("Dose Reminder Cron!");
-    const hour = new Date().getHours();
-    const slotID = SlotMapper[hour];
-    console.log("🚀 ~ file: doseReminder.js:24 ~ scheduledJobFunction ~ slotID:", slotID)
-    if (slotID === undefined || slotID === null) return;
+      console.log("Dose Reminder Cron!");
+      const hour = new Date().getHours();
+      const slotID = SlotMapper[hour];
+      console.log(
+        "🚀 ~ file: doseReminder.js:24 ~ scheduledJobFunction ~ slotID:",
+        slotID
+      );
+      if (slotID === undefined || slotID === null) return;
 
-    let userIds = [];
+      let userIds = [];
 
-    let scheduleDoses = await ScheduleDose.findAll({
-      where: {
-        [Op.or]: [
-          sequelize.fn(
-            "JSON_CONTAINS",
-            sequelize.col("slot_ids"),
-            `[${slotID}]`
-          ),
-        ],
-      },
-    });
+      let scheduleDoses = await ScheduleDose.findAll({
+        where: {
+          [Op.or]: [
+            sequelize.fn(
+              "JSON_CONTAINS",
+              sequelize.col("slot_ids"),
+              `[${slotID}]`
+            ),
+          ],
+        },
+      });
 
-    for (let i = 0; i < scheduleDoses.length; i++) {
-      userIds.push(scheduleDoses[i].patient_id);
+      for (let i = 0; i < scheduleDoses.length; i++) {
+        userIds.push(scheduleDoses[i].patient_id);
+      }
+
+      userIds = _.uniq(userIds);
+
+      let users = await User.findAll({
+        where: {
+          id: [...userIds, 1],
+        },
+        attributes: ["id", "fcmToken", "firstName", "phone"],
+      });
+
+      for (let i = 0; i < users.length; i++) {
+        if (
+          users[i].fcmToken !== "" &&
+          (users[i].id === 7 || users[i].id === 1)
+        )
+          await sendPushNotification(
+            `${users[i].firstName}, Time to take your medications!`,
+            "It's time to take your medicines. Open DoseTap pill box to take your medications.",
+            users[i].fcmToken
+          );
+      }
     }
-
-    userIds = _.uniq(userIds);
-
-    let users = await User.findAll({
-      where: {
-        id: [...userIds, 1],
-      },
-      attributes: ["id", "fcmToken", "firstName", "phone"],
-    });
-
-    for (let i = 0; i < users.length; i++) {
-      if (users[i].fcmToken !== "" && (users[i].id === 7 || users[i].id === 1))
-        await sendPushNotification(
-          `${users[i].firstName}, Time to take your medications!`,
-          "It's time to take your medicines. Open DoseTap pill box to take your medications.",
-          users[i].fcmToken
-        );
-    }
-  });
-
+  );
   scheduledJobFunction.start();
 };
