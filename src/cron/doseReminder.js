@@ -7,7 +7,7 @@ const sequelize = require("sequelize");
 
 export const initScheduledJobs = () => {
   const scheduledJobFunction = CronJob.schedule(
-    "01 01 5-21 * * *",
+    "00 01 5-21 * * *",
     async () => {
       const SlotMapper = {
         5: 1,
