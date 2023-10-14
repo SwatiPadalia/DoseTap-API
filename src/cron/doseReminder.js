@@ -24,7 +24,7 @@ export const initScheduledJobs = () => {
         21: 8,
       };
 
-      console.log("Dose Reminder Cron!");
+      console.log(`Dose Reminder Cron! at ${new Date()}`);
       const hour = new Date().getHours();
       const slotID = SlotMapper[hour];
       console.log(
@@ -56,21 +56,22 @@ export const initScheduledJobs = () => {
       let users = await User.findAll({
         where: {
           id: [...userIds],
-          status: true
+          status: true,
         },
         attributes: ["id", "fcmToken", "firstName", "phone"],
       });
 
-      for (let i = 0; i < users.length; i++) {
-        if (
-          users[i].fcmToken !== "" &&
-          (users[i].id === 7 || users[i].id === 1)
-        )
-          await sendPushNotification(
-            `${users[i].firstName}, Time to take your medications!`,
-            "It's time to take your medicines. Open DoseTap pill box to take your medications.",
-            users[i].fcmToken
+      for (let j = 0; j < users.length; j++) {
+        if (users[j].fcmToken !== "" && users[j].id === 7) {
+          console.log(
+            `Notification send to user Id: ${users[j].id} at ${new Date()}`
           );
+          await sendPushNotification(
+            `${users[j].firstName}, Time to take your medications!`,
+            "It's time to take your medicines. Open DoseTap pill box to take your medications.",
+            users[j].fcmToken
+          );
+        }
       }
     }
   );
