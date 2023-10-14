@@ -55,7 +55,8 @@ export const initScheduledJobs = () => {
 
       let users = await User.findAll({
         where: {
-          id: [...userIds, 1],
+          id: [...userIds],
+          status: true
         },
         attributes: ["id", "fcmToken", "firstName", "phone"],
       });
