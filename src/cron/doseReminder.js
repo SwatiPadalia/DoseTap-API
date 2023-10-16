@@ -62,7 +62,7 @@ export const initScheduledJobs = () => {
       });
 
       for (let j = 0; j < users.length; j++) {
-        if (users[j].fcmToken !== "" && users[j].id === 7) {
+        if ((users[j].fcmToken !== "" || users[j].fcmToken !== null )  && users[j].id === 77) {
           console.log(
             `Notification send to user Id: ${users[j].id} at ${new Date()}`
           );
