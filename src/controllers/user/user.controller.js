@@ -114,7 +114,8 @@ export const syncData = async (req, res) => {
     });
     if (!device) throw new Error("Device do not exist");
 
-    await Device.update({ firmwareVersion }, { where: { id: device.id } });
+    if (firmwareVersion.length > 4)
+      await Device.update({ firmwareVersion }, { where: { id: device.id } });
 
     const deviceCompanyMapping = await DeviceCompanyMappings.findOne({
       where: {
