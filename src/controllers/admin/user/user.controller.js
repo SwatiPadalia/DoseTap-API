@@ -756,9 +756,9 @@ export const medicineAdherenceDataPerUser = async (req, res) => {
       result.push({
         totalOpen,
         totalMissed,
-        medicineId: scheduledMedicines[0].medicine_id,
-        medicineName: scheduledMedicines[0].medicineDetails.name,
-        companyName: scheduledMedicines[0].medicineDetails.companyName,
+        medicineId: scheduledMedicines[i].medicine_id,
+        medicineName: scheduledMedicines[i].medicineDetails.name,
+        companyName: scheduledMedicines[i].medicineDetails.companyName,
       });
     }
 
