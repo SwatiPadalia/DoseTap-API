@@ -61,8 +61,12 @@ export const initScheduledJobs = () => {
         attributes: ["id", "fcmToken", "firstName", "phone"],
       });
 
+      users = _.uniqBy(users, function (e) {
+        return e.id;
+      });
+
       for (let j = 0; j < users.length; j++) {
-        if ((users[j].fcmToken !== "" || users[j].fcmToken !== null )) {
+        if (users[j].fcmToken !== "" || users[j].fcmToken !== null) {
           console.log(
             `Notification send to user Id: ${users[j].id} at ${new Date()}`
           );
