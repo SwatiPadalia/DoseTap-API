@@ -13,6 +13,7 @@ export const initScheduledJobs = () => {
         console.log("Cron donot run on development");
         return;
       }
+      if (!cluster.isMaster) { return; }
       const SlotMapper = {
         5: 1,
         9: 2,
