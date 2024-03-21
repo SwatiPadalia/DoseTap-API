@@ -2,7 +2,7 @@ require('@babel/register');
 /* eslint-disable no-console */
 const chalk = require('chalk');
 const dotenv = require('dotenv');
-const cluster = require('cluster');
+global.cluster = require('cluster');
 const numCores = require('os').cpus().length;
 const app = require('./app');
 
@@ -57,7 +57,7 @@ const setupWorkerProcesses = () => {
 // Setup an express server and define port to listen all incoming requests for this application
 const setUpExpress = () => {
   dotenv.config({ path: '.env' });
-  
+
   const port = process.env.APP_PORT || 3000;
 
   const server = app.listen(port, () => {
