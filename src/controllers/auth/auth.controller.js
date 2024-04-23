@@ -68,7 +68,7 @@ export const register = async (req, res) => {
     if (role == "user") {
       const doctorWithActivationCode = await User.findOne({
         where: {
-          reference_code,
+          reference_code: reference_code.trim(),
           role: "doctor",
         },
       });
