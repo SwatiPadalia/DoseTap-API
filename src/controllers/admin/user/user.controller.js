@@ -732,23 +732,25 @@ export const medicineAdherenceDataPerUser = async (req, res) => {
         [Op.and]: [{ status: "missed" }, { patient_id: patient_id }],
       },
     });
-
     const result = [];
 
     for (let i = 0; i < scheduledMedicines.length; i++) {
       let totalOpen = 0;
       let totalMissed = 0;
       const slotIds = scheduledMedicines[i].slot_ids;
-      
+      let openBox = [];
+      let missedBox = [];
 
       total_adherence_open.rows.map((ao) => {
         if (slotIds.includes(ao.slot_id)) {
+          openBox.push(ao);
           totalOpen++;
         }
       });
 
       total_adherence_missed.rows.map((ao) => {
         if (slotIds.includes(ao.slot_id)) {
+          missedBox.push(ao);
           totalMissed++;
         }
       });
@@ -756,6 +758,8 @@ export const medicineAdherenceDataPerUser = async (req, res) => {
       result.push({
         totalOpen,
         totalMissed,
+        openBox,
+        missedBox,
         medicineId: scheduledMedicines[i].medicine_id,
         medicineName: scheduledMedicines[i].medicineDetails.name,
         companyName: scheduledMedicines[i].medicineDetails.companyName,

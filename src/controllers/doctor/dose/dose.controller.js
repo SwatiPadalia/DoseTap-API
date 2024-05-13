@@ -1,45 +1,73 @@
 import { errorResponse, successResponse } from '../../../helpers';
 const { Op } = require('sequelize');
-const { ScheduleDose, Medicine, User } = require('../../../models');
+const { ScheduleDose, Medicine, User, Adherence } = require('../../../models');
 const _ = require('lodash')
 
 export const allMedicine = async (req, res) => {
 
     try {
         const patient_id = req.params.id;
-
-        const page = req.query.page || 1;
-        const limit = 10;
-
-        const doses = await ScheduleDose.findAll({
-            where: {
-                patient_id
-            },
-            include: [{ model: Medicine, as: 'medicineDetails' }]
+    
+        const scheduledMedicines = await ScheduleDose.findAll({
+          where: {
+            patient_id,
+          },
+    
+          include: {
+            model: Medicine,
+            as: "medicineDetails",
+          },
         });
-        let medicines = [...(_.uniqBy(doses, function (e) {
-            return e.medicineDetails.id;
-        }))].map(d => {
-            return {
-                id: d.medicineDetails.id,
-                name: d.medicineDetails.name,
-                companyName: d.medicineDetails.companyName
+       
+        const total_adherence_open = await Adherence.findAndCountAll({
+          where: {
+            [Op.and]: [{ status: "open" }, { patient_id: patient_id }],
+          },
+        });
+       
+        const total_adherence_missed = await Adherence.findAndCountAll({
+          where: {
+            [Op.and]: [{ status: "missed" }, { patient_id: patient_id }],
+          },
+        });
+        const result = [];
+    
+        for (let i = 0; i < scheduledMedicines.length; i++) {
+          let totalOpen = 0;
+          let totalMissed = 0;
+          const slotIds = scheduledMedicines[i].slot_ids;
+          let openBox = [];
+          let missedBox = [];
+    
+          total_adherence_open.rows.map((ao) => {
+            if (slotIds.includes(ao.slot_id)) {
+              openBox.push(ao);
+              totalOpen++;
             }
-        });
-
+          });
+    
+          total_adherence_missed.rows.map((ao) => {
+            if (slotIds.includes(ao.slot_id)) {
+              missedBox.push(ao);
+              totalMissed++;
+            }
+          });
+    
+          result.push({
+            totalOpen,
+            totalMissed,
+            openBox,
+            missedBox,
+            medicineId: scheduledMedicines[i].medicine_id,
+            medicineName: scheduledMedicines[i].medicineDetails.name,
+            companyName: scheduledMedicines[i].medicineDetails.companyName,
+          });
+        }
+    
         return successResponse(req, res, {
-            medicines:
-            {
-                count: medicines.length,
-                rows: medicines,
-                currentPage: parseInt(page),
-                totalPage: Math.ceil(medicines.length / limit)
-            }
+          medicines: result,
         });
-
-        return successResponse(req, res, { medicines });
-    } catch (error) {
-        console.log(error);
+      } catch (error) {
         return errorResponse(req, res, error.message);
-    }
+      }
 }
