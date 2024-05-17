@@ -1,35 +1,101 @@
 import { errorResponse, successResponse } from '../../../helpers';
 import { Company, Device, DeviceCompanyMappings } from '../../../models';
+
+const fs = require("fs");
+const csv = require("fast-csv");
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 
 export const create = async (req, res) => {
-    try {
-        const {
-            name, description, serialNumber, firmwareVersion
-        } = req.body;
-        const device = await Device.findOne({
-            where: {
-                [Op.or]: [{ serialNumber }]
-            },
-        });
-        if (device) {
-            throw new Error('Device with serial number exists');
+  try {
+    const {
+      name, description, serialNumber, firmwareVersion
+    } = req.body;
+    const device = await Device.findOne({
+      where: {
+        [Op.or]: [{ serialNumber }]
+      },
+    });
+    if (device) {
+      throw new Error('Device with serial number exists');
+    }
+
+    const payload = {
+      name,
+      description,
+      serialNumber,
+      firmwareVersion
+    };
+
+    const newDevice = await Device.create(payload);
+    return successResponse(req, res, {});
+  } catch (error) {
+    return errorResponse(req, res, error.message);
+  }
+}
+
+export const csvBulkDeviceImport = async (req, res) => {
+  try {
+    if (!req.file) {
+      return errorResponse(req, res, 'Please upload a CSV file!');
+    }
+
+    const devices = [];
+    const path = __basedir + '/uploads/' + req.file.filename;
+
+    fs.createReadStream(path)
+      .pipe(csv.parse({
+        headers: true,
+        discardUnmappedColumns: true,
+        skipLinesWithError: true,
+        error: (error) => {
+          console.error('CSV Parsing Error:', error);
+        }
+      }))
+      .on('error', (error) => {
+        throw new Error('Error parsing CSV: ' + error.message);
+      })
+      .on('data', (row) => {
+        devices.push(row);
+      })
+      .on('end', async () => {
+        const errorDetails = [];
+        const successDetails = [];
+        console.log("devices", devices);
+        for (let i = 0; i < devices.length; i++) {
+          const device = devices[i];
+          const { name, serialNumber, firmwareVersion, description } = device;
+          if (!name || !serialNumber || !firmwareVersion || !description) {
+            console.error(`Missing required field(s) in row ${i + 1}`);
+            continue;
+          }
+          try {
+            const existingDevice = await Device.findOne({ where: { serialNumber } });
+        
+            if (existingDevice) {
+              throw new Error(`Duplicate serial number found in row ${i + 1}: ${serialNumber}`);
+            }
+            const newDevice = await Device.create({ name, description, serialNumber, firmwareVersion });
+            console.log(`New Device Created for row ${i + 1}:`, newDevice.toJSON());
+            successDetails.push({ rowNumber: i + 1, message: `Device created successfully: ${name}` });
+          } catch (error) {
+            console.error(`Error processing row ${i + 1}:`, error.message);
+            errorDetails.push({ rowNumber: i + 1, error: error.message });
+          }
         }
 
-        const payload = {
-            name,
-            description,
-            serialNumber,
-            firmwareVersion
-        };
+        fs.unlinkSync(path);
 
-        const newDevice = await Device.create(payload);
-        return successResponse(req, res, {});
-    } catch (error) {
-        return errorResponse(req, res, error.message);
-    }
-}
+        if (errorDetails.length > 0) {
+          return errorResponse(req, res, { message: 'Bulk device import partially failed', errorDetails });
+        } else {
+          return successResponse(req, res, { message: 'Bulk device import successful', successDetails });
+        }
+      });
+  } catch (error) {
+    return errorResponse(req, res, error.message);
+  }
+};
 
 export const update = async (req, res) => {
     try {
