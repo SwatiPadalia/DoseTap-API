@@ -3,6 +3,7 @@ import {
   errorResponse,
   successResponse,
   uniqueCode,
+  updateOrCreate,
   uniqueId,
 } from "../../../helpers";
 import {
@@ -13,6 +14,7 @@ import {
   Medicine,
   ScheduleDose,
   User,
+  Slot, UserSlot,
   UserCareTakerMappings,
   UserDoctorMappings,
 } from "../../../models";
@@ -705,6 +707,119 @@ export const doses = async (req, res) => {
     return errorResponse(req, res, error.message);
   }
 };
+
+export const scheduleDosebyAdmin = async (req, res) => {
+  try {
+    const { medicine_id, slot_ids, days, count_morning, count_afternoon, count_evening, count_night, patient_id } = req.body;
+
+    const isMedicineSceduled = await ScheduleDose.findOne({
+      where: {
+        medicine_id,
+        patient_id,
+      },
+    });
+
+    if (isMedicineSceduled) {
+      return errorResponse(req, res, 'Medicine already scheduled.');
+    }
+
+    const payload = {
+      patient_id,
+      medicine_id,
+      slot_ids,
+      days,
+      count_morning,
+      count_afternoon,
+      count_evening,
+      count_night,
+    };
+
+    const doseCreated = await ScheduleDose.create(payload);
+
+    return successResponse(req, res, doseCreated);
+  } catch (error) {
+    console.log(error);
+    return errorResponse(req, res, error.message);
+  }
+};
+
+export const createUserSlotByAdmin = async (req, res) => {
+  try {
+      const {
+          data
+      } = req.body;
+      for (const slot of data) {
+          const where = {
+              slot_id: slot.slot_id,
+              user_id: slot.user_id
+          }
+          await updateOrCreate(UserSlot, where, slot);
+      }
+      return successResponse(req, res, {});
+  } catch (error) {
+      return errorResponse(req, res, error.message);
+  }
+}
+
+export const allUserSLot = async (req, res) => {
+  try {
+      const user_id = req.params.id;
+
+      let user_slot = await UserSlot.findAll({
+          where: {
+              user_id
+          },
+          include: [{ model: Slot, as: 'slots' }]
+      })
+
+      if (user_slot.length == 0) {
+          const slotsData = await Slot.findAll({
+              order: [['id', 'ASC']],
+          });
+          user_slot = slotsData.map(s => {
+              return {
+                  id: s.id,
+                  name: s.name,
+                  type: s.type,
+                  startTime: s.startTime,
+                  endTime: s.endTime,
+                  order: s.order,
+                  displayName: s.displayName,
+                  displayType: s.displayType,
+                  time: null,
+                  createdAt: s.createdAt,
+                  updatedAt: s.updatedAt
+              }
+          });
+
+      } else {
+          user_slot = user_slot.map(s => {
+              return {
+                  id: s.slot_id,
+                  name: s.slots.name,
+                  type: s.slots.type,
+                  startTime: s.slots.startTime,
+                  endTime: s.slots.endTime,
+                  order: s.slots.order,
+                  displayName: s.slots.displayName,
+                  displayType: s.slots.displayType,
+                  time: s.time,
+                  createdAt: s.createdAt,
+                  updatedAt: s.updatedAt
+              }
+          });
+
+      }
+
+      const slots = {
+          count: user_slot.length,
+          rows: user_slot
+      }
+      return successResponse(req, res, { slots });
+  } catch (error) {
+      return errorResponse(req, res, error.message);
+  }
+}
 
 export const medicineAdherenceDataPerUser = async (req, res) => {
   try {
