@@ -15,11 +15,16 @@ import * as slotController from "../controllers/admin/slot/slot.controller";
 import * as slotValidator from "../controllers/admin/slot/slot.validator";
 import * as userController from "../controllers/admin/user/user.controller";
 import * as userValidator from "../controllers/admin/user/user.validator";
+import * as doseValidator from "../controllers/user/dose/dose.validator";
 import uploadMiddleware from "../middleware/upload";
 import * as referenceCodeValidator from "../controllers/admin/reference-codes/reference-code.validator";
 import * as referenceCodeController from "../controllers/admin/reference-codes/reference-codes.controller";
 import * as firmwareController from "../controllers/admin/firmware/firmware.controller";
 import * as firmwareValidator from "../controllers/admin/firmware/firmware.validator";
+import * as userSlotValidator from "../controllers/user/user-slot/user-slot.validator";
+
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 const router = express.Router();
 
 //= ===============================
@@ -37,7 +42,18 @@ router.put(
 );
 router.put("/user/:id/status", userController.statusUpdate);
 router.get("/user/:id/doses", userController.doses);
+router.get("/user/:id/user-slots", userController.allUserSLot);
 router.get("/user/:id/adherence", userController.medicineAdherenceDataPerUser);
+router.post(
+  "/user-slots",
+  validate(userSlotValidator.create),
+  userController.createUserSlotByAdmin
+);
+router.post(
+  "/schedule-dose",
+  validate(doseValidator.scheduleDoses),
+  userController.scheduleDosebyAdmin,
+);
 
 // Device
 
@@ -52,6 +68,9 @@ router.put(
   "/device/:id",
   validate(deviceValidator.updateDevice),
   deviceController.update
+);
+router.post(
+  "/bulk-device", upload.single('file'), deviceController.csvBulkDeviceImport
 );
 router.put("/device/:id/status", deviceController.statusUpdate);
 router.post(
