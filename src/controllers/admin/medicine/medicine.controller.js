@@ -77,50 +77,51 @@ export const findById = async (req, res) => {
 
 export const all = async (req, res) => {
     try {
-        let searchFilter = null, statusFilter = null, dateFilter = null;
+        let medicineNameFilter = null, companyNameFilter = null, statusFilter = null, dateFilter = null;
 
         const sort = req.query.sort || -1;
+        const sortBy = req.query.sortBy || 'name';
 
-        if (req.query.search) {
-            const search = req.query.search;
+        if (req.query.medicineName) {
+            const medicineName = req.query.medicineName.toLowerCase();
+            medicineNameFilter = sequelize.where(
+                sequelize.fn('LOWER', sequelize.col('name')), { [Op.like]: `%${medicineName}%` }
+            );
+        }
 
-
-            searchFilter = {
-                [Op.or]: [
-                    sequelize.where(
-                        sequelize.fn('LOWER', sequelize.col('name')), { [Op.like]: `%${search}%` }
-                    ),
-                    sequelize.where(
-                        sequelize.fn('LOWER', sequelize.col('companyName')), { [Op.like]: `%${search}%` }
-                    ),
-                ]
-            }
+        if (req.query.companyName) {
+            const companyName = req.query.companyName.toLowerCase();
+            companyNameFilter = sequelize.where(
+                sequelize.fn('LOWER', sequelize.col('companyName')), { [Op.like]: `%${companyName}%` }
+            );
         }
 
         if (req.query.status) {
             const status = req.query.status;
-            if (status == 1) {
-                statusFilter = true
-            } else {
-                statusFilter = false
-            }
+            statusFilter = status == 1 ? true : false;
         }
 
         if (req.query.createdAt) {
             const query = req.query.createdAt;
             dateFilter = sequelize.where(
                 sequelize.fn('LOWER', sequelize.col('createdAt')), { [Op.like]: `%${query}%` }
-            )
+            );
         }
 
         const page = req.query.page || 1;
         const limit = 10;
         const sortOrder = sort == -1 ? 'ASC' : 'DESC';
+
         const medicines = await Medicine.findAndCountAll({
             where: {
-                [Op.and]: [statusFilter === null ? undefined : { status: statusFilter }, searchFilter === null ? undefined : { searchFilter }, dateFilter === null ? undefined : { dateFilter }]
+                [Op.and]: [
+                    statusFilter === null ? undefined : { status: statusFilter },
+                    medicineNameFilter,
+                    companyNameFilter,
+                    dateFilter
+                ].filter(Boolean)  // Filters out null/undefined conditions
             },
-            order: [['name', 'ASC']],
+            order: [[sortBy, sortOrder]],
             offset: (page - 1) * limit,
             limit,
         });

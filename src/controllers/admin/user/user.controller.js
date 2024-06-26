@@ -173,6 +173,7 @@ export const update = async (req, res) => {
       gender,
       email,
       password,
+      company_id,
       phone,
       city,
       role,
@@ -217,6 +218,7 @@ export const update = async (req, res) => {
         phone,
         city,
         state,
+        company_id
       };
     }
 
