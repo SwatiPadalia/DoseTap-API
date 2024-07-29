@@ -101,16 +101,22 @@ export const all = async (req, res) => {
       where: {
         caretaker_id: userId
       }
-    })
-    const patient_id = user_caretaker.patient_id
-    console.log("🚀 ~ file: dose.controller.js ~ line 105 ~ all ~ patient_id", patient_id)
-    const doses = await CareTakerScheduleDose.findAll({
-      where: {
-        patient_id
-      },
-      include: [{ model: Medicine, as: 'medicineDetails' }, { model: User, as: 'patientDetails' }]
     });
-    return successResponse(req, res, { doses });
+
+    if (user_caretaker) {
+      const patient_id = user_caretaker.patient_id;
+
+      const doses = await ScheduleDose.findAll({
+        where: {
+          patient_id
+        },
+        include: [{ model: Medicine, as: 'medicineDetails' }, { model: User, as: 'patientDetails' }]
+      });
+
+      return successResponse(req, res, { doses });
+    } else { 
+      return errorResponse(req, res, "No caretaker found");
+    }
   } catch (error) {
     console.log(error);
     return errorResponse(req, res, error.message);

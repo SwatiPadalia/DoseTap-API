@@ -275,6 +275,7 @@ export const login = async (req, res) => {
     });
 
     let patient = null;
+    let caregiver = null;
     if (user.role == "caretaker") {
       patient = await UserCareTakerMappings.findAll({
         where: {
@@ -295,15 +296,26 @@ export const login = async (req, res) => {
         },
         order: [["createdAt", "DESC"]],
       });
+    } else if (user.role == "user") {
+      caregiver = await UserCareTakerMappings.findAll({
+        where: {
+          patient_id: user.id,
+        },
+        include: [
+          {
+            model: User,
+            as: "caretaker",
+          },
+        ],
+      });
     }
-
     if (req.body.fcmToken)
       await User.update(
         { fcmToken: req.body.fcmToken },
         { where: { id: user.id } }
       );
 
-    return successResponse(req, res, { user, token, alarm, patient });
+    return successResponse(req, res, { user, token, alarm, patient, caregiver });
   } catch (error) {
     return errorResponse(req, res, error.message);
   }
